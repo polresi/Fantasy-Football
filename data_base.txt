@@ -1,0 +1,469 @@
+Oblak;por;29000000;Atlético de Madrid;164
+Unai Simón;por;24000000;Athletic Club;166
+Ter Stegen;por;29000000;FC Barcelona;284
+Iván Villar;por;18000000;RC Celta;85
+David Soria;por;29000000;Getafe CF;237
+Aitor Fdez;por;26000000;CA Osasuna;126
+Courtois;por;34000000;Real Madrid;224
+Remiro;por;28000000;Real Sociedad;230
+Jaume Domenech;por;1000000;Valencia CF;0
+Aarón Escandell;por;1000000;UD Las Palmas;0
+Sergio Herrera;por;21000000;CA Osasuna;74
+David Gil;por;15000000;Cádiz CF;24
+Claudio Bravo;por;27000000;Real Betis;70
+Lunin;por;17000000;Real Madrid;42
+Ledesma;por;29000000;Cádiz CF;210
+Sivera;por;7000000;Deportivo Alavés;0
+Grbić;por;26000000;Atlético de Madrid;57
+Cárdenas;por;1000000;Rayo Vallecano;0
+Dimitrievski;por;19000000;Rayo Vallecano;168
+Cristian Rivero;por;1000000;Valencia CF;0
+Rui Silva;por;24000000;Real Betis;144
+Dmitrovic;por;22000000;Sevilla FC;77
+Greif;por;6000000;RCD Mallorca;6
+Agirrezabala;por;12000000;Athletic Club;41
+Fuidias;por;877800;Girona FC;0
+Mamardashvili;por;20000000;Valencia CF;182
+Maximiano;por;7000000;UD Almería;0
+Fernando;por;22000000;UD Almería;179
+Juan Carlos;por;1000000;Girona FC;42
+Pepe Reina;por;25000000;Villarreal CF;119
+Rajkovic;por;25000000;RCD Mallorca;186
+Marchesín;por;1000000;RC Celta;100
+Gazzaniga;por;27000000;Girona FC;150
+Jörgensen;por;21000000;Villarreal CF;6
+Mariño;por;6000000;UD Almería;2
+Vallés;por;12000000;UD Las Palmas;0
+Raúl F;por;6000000;Granada CF;0
+André F;por;6000000;Granada CF;0
+Adri Lopez;por;1000000;Granada CF;0
+Owono;por;1000000;Deportivo Alavés;0
+Fuzato;por;1000000;Getafe CF;0
+Arrizabalaga;por;21000000;Real Madrid;0
+Giménez;def;11000000;Atlético de Madrid;173
+Savic;def;7000000;Atlético de Madrid;101
+De Marcos;def;6000000;Athletic Club;157
+Lekue;def;5000000;Athletic Club;67
+Yuri;def;6000000;Athletic Club;105
+Yeray;def;6000000;Athletic Club;135
+Unai Nuñez;def;6000000;RC Celta;156
+Sergi Roberto;def;6000000;FC Barcelona;104
+Mandi;def;6000000;Villarreal CF;77
+Kevin Vázquez;def;5000000;RC Celta;21
+Hermoso;def;7000000;Atlético de Madrid;142
+Damián;def;4620000;Getafe CF;97
+Djené;def;7000000;Getafe CF;125
+Carvajal;def;6000000;Real Madrid;74
+Nacho;def;6600000;Real Madrid;108
+Lucas Vázquez;def;7000000;Real Madrid;92
+Le Normand;def;7000000;Real Sociedad;163
+Gorosabel;def;6000000;Deportivo Alavés;95
+Zaldua;def;1000000;Cádiz CF;11
+Aritz;def;6000000;Real Sociedad;86
+Aihen;def;7000000;Real Sociedad;81
+Zubeldia;def;7000000;Real Sociedad;148
+Navas;def;6000000;Sevilla FC;81
+Diakhaby;def;7000000;Valencia CF;136
+Gabriel Paulista;def;7000000;Valencia CF;73
+Gayá;def;7000000;Valencia CF;124
+Jaume Costa;def;6000000;RCD Mallorca;105
+Pedraza;def;6000000;Villarreal CF;99
+Rubén Peña;def;6000000;CA Osasuna;62
+Duarte;def;6000000;Deportivo Alavés;0
+Militão;def;7000000;Real Madrid;188
+Mendy;def;5000000;Real Madrid;66
+Koundé;def;11000000;FC Barcelona;184
+Albiol;def;5000000;Villarreal CF;121
+Víctor Díaz;def;4000000;Granada CF;0
+Neva;def;5000000;Granada CF;0
+Nacho Vidal;def;6000000;CA Osasuna;58
+Aridane;def;7000000;Rayo Vallecano;105
+Unai García;def;7000000;CA Osasuna;76
+David García;def;7000000;CA Osasuna;156
+Alberto Moreno;def;6000000;Villarreal CF;67
+Aidoo;def;7000000;RC Celta;178
+Domingos Duarte;def;7000000;Getafe CF;121
+Thierry Correia;def;6000000;Valencia CF;84
+Foulquier;def;6000000;Valencia CF;80
+Espino;def;7000000;Rayo Vallecano;138
+Fali;def;6000000;Cádiz CF;88
+Iza;def;7000000;Cádiz CF;126
+Juan Cruz;def;6000000;CA Osasuna;72
+Lato;def;6000000;RCD Mallorca;69
+Javi López;def;4000000;Deportivo Alavés;0
+Odriozola;def;4000000;Real Madrid;5
+Acuña;def;6000000;Sevilla FC;94
+Araújo;def;13000000;FC Barcelona;130
+Foyth;def;7000000;Villarreal CF;102
+Miranda;def;7000000;Real Betis;96
+Mingueza;def;7000000;RC Celta;52
+Catena;def;6000000;CA Osasuna;152
+David López;def;7000000;Girona FC;101
+Pedrosa;def;6000000;Sevilla FC;24
+Raíllo;def;16000000;RCD Mallorca;188
+Sedlar;def;6000000;Deportivo Alavés;0
+Areso;def;5000000;CA Osasuna;0
+Maffeo;def;7000000;RCD Mallorca;139
+Martín;def;1000000;Rayo Vallecano;0
+Balliu;def;6000000;Rayo Vallecano;90
+Valjent;def;7000000;RCD Mallorca;135
+Eric García;def;6000000;FC Barcelona;83
+Sabaly;def;11000000;Real Betis;99
+Juan Iglesias;def;6000000;Getafe CF;85
+Mitrovic;def;6000000;Getafe CF;97
+Alaba;def;11000000;Real Madrid;113
+Vallejo;def;4000000;Granada CF;2
+Alderete;def;7000000;Getafe CF;97
+Manu Sánchez;def;6000000;RC Celta;103
+Diego Rico;def;5000000;Real Sociedad;78
+Miquel;def;6000000;Granada CF;0
+Mojica;def;5000000;CA Osasuna;41
+Edgar;def;6000000;UD Almería;122
+Javi Galán;def;6000000;Atlético de Madrid;137
+Lejeune;def;6000000;Rayo Vallecano;132
+Jon Pacheco;def;7000000;Real Sociedad;67
+Álex Balde;def;7000000;FC Barcelona;203
+Vivian;def;6000000;Athletic Club;132
+Carlos Domínguez;def;1188000;RC Celta;10
+Miguel Gutiérrez;def;7000000;Girona FC;141
+Carmona;def;4000000;Getafe CF;59
+Pozo;def;6000000;UD Almería;96
+Jesús Vázquez;def;4000000;Valencia CF;27
+Cuenca;def;7000000;Villarreal CF;36
+Chust;def;5000000;Cádiz CF;49
+Abqar;def;6000000;Deportivo Alavés;0
+Fran García;def;7000000;Real Madrid;145
+Pezzella;def;7000000;Real Betis;147
+Maras;def;1000000;Deportivo Alavés;0
+Tenaglia;def;5610000;Deportivo Alavés;0
+Luis Hernández;def;7000000;Cádiz CF;129
+Gastón;def;6000000;Getafe CF;61
+Gio González;def;6000000;RCD Mallorca;59
+Reinildo;def;10560000;Atlético de Madrid;112
+Akieme;def;6000000;UD Almería;78
+Centelles;def;7000000;UD Almería;50
+Chumi;def;6000000;UD Almería;47
+Bernardo;def;6000000;Girona FC;57
+Valery;def;6000000;Girona FC;71
+Juanpe;def;7000000;Girona FC;58
+Santi Bueno;def;7000000;Girona FC;121
+Arnau Mtnez;def;7000000;Girona FC;119
+Rüdiger;def;6000000;Real Madrid;153
+Mendes;def;2000000;UD Almería;14
+Marcao;def;4000000;Sevilla FC;15
+Copete;def;7000000;RCD Mallorca;125
+Angileri;def;4000000;Getafe CF;7
+Nahuel Molina;def;10000000;Atlético de Madrid;134
+Kiko Femenía;def;5000000;Villarreal CF;54
+Yan Couto;def;6000000;Girona FC;77
+Álex Sola;def;4000000;Real Sociedad;23
+Christensen;def;6000000;FC Barcelona;117
+Kaiky;def;5000000;UD Almería;17
+Momo Mbaye;def;5000000;Cádiz CF;34
+Nianzou;def;5000000;Sevilla FC;50
+Luiz Felipe;def;7000000;Real Betis;98
+Cenk;def;7000000;Valencia CF;73
+Chavarría;def;6000000;Rayo Vallecano;37
+Mumin;def;6000000;Rayo Vallecano;37
+Marcos Alonso;def;4620000;FC Barcelona;76
+Badé;def;7000000;Sevilla FC;95
+Abner;def;6000000;Real Betis;7
+Callens;def;4000000;Girona FC;9
+Meré;def;6000000;Cádiz CF;36
+Cardona;def;5000000;UD Las Palmas;0
+Álex Suárez;def;6000000;UD Las Palmas;0
+E Curbelo;def;1000000;UD Las Palmas;0
+Lemos S;def;5000000;UD Las Palmas;0
+Coco;def;5000000;UD Las Palmas;0
+Miguel Rubio;def;6000000;Granada CF;0
+Ricard;def;5000000;Granada CF;0
+Miki Bosch;def;66000;Granada CF;0
+Joseda;def;132000;Deportivo Alavés;0
+Azpilicueta;def;6000000;Atlético de Madrid;0
+Paredes;def;6000000;Athletic Club;0
+Imanol;def;6000000;Athletic Club;0
+Daley Blind;def;10000000;Girona FC;0
+Gabbia;def;5000000;Villarreal CF;0
+Traoré;def;7000000;Real Sociedad;0
+Gattoni;def;4000000;Sevilla FC;0
+Sinkgraven;def;4000000;UD Las Palmas;0
+Heyden;def;1000000;RCD Mallorca;0
+Rafa Marín;def;4000000;Deportivo Alavés;0
+Marc Pubill;def;5000000;UD Almería;0
+Söyüncü;def;4000000;Atlético de Madrid;0
+Manafá;def;1000000;Granada CF;0
+Mika Marmol;def;6000000;UD Las Palmas;0
+Starfelt;def;6000000;RC Celta;0
+Cristhian;def;4000000;Valencia CF;0
+Koke;mig;7000000;Atlético de Madrid;151
+Lemar;mig;7000000;Atlético de Madrid;98
+Saúl;mig;7000000;Atlético de Madrid;91
+Marcos Llorente;mig;16000000;Atlético de Madrid;109
+Dani García;mig;7000000;Athletic Club;89
+Muniain;mig;7000000;Athletic Club;132
+Unai López;mig;7000000;Rayo Vallecano;97
+Raúl García;mig;6000000;Athletic Club;103
+Vesga;mig;10000000;Athletic Club;158
+Rakitić;mig;7000000;Sevilla FC;113
+Guardado;mig;7000000;Real Betis;88
+William Carvalho;mig;7000000;Real Betis;157
+Brasanac;mig;4000000;CA Osasuna;68
+Fran Beltrán;mig;7000000;RC Celta;150
+Brais Méndez;mig;10000000;Real Sociedad;190
+Arambarri;mig;7260000;Getafe CF;58
+Maksimovic;mig;11000000;Getafe CF;107
+Melero;mig;7000000;UD Almería;129
+Isco;mig;6000000;Real Betis;45
+Modric;mig;6000000;Real Madrid;135
+Valverde;mig;13000000;Real Madrid;203
+Kroos;mig;12000000;Real Madrid;173
+Guevara;mig;6000000;Deportivo Alavés;18
+Mikel Merino;mig;12000000;Real Sociedad;182
+Jordán;mig;6000000;Sevilla FC;68
+Coquelin;mig;5742000;Villarreal CF;54
+Parejo;mig;10000000;Villarreal CF;205
+Trigueros;mig;6000000;Villarreal CF;54
+De Jong;mig;18000000;FC Barcelona;195
+Denis Suárez;mig;7000000;Villarreal CF;52
+Rioja;mig;11000000;Deportivo Alavés;0
+Antonio Puertas;mig;1000000;Granada CF;0
+Moncayola;mig;7000000;CA Osasuna;133
+Rubén García;mig;10000000;CA Osasuna;106
+Fernando;mig;7000000;Sevilla FC;85
+Óliver Torres;mig;7000000;Sevilla FC;118
+Moi Gómez;mig;13000000;CA Osasuna;164
+Fekir;mig;23100000;Real Betis;63
+Gudelj;mig;7000000;Sevilla FC;153
+Barrenetxea;mig;12000000;Real Sociedad;103
+Sancet;mig;7000000;Athletic Club;197
+Guido Rodríguez;mig;12000000;Real Betis;170
+Carrasco;mig;21000000;Atlético de Madrid;187
+Jose Mari;mig;4000000;Cádiz CF;32
+Álex Fernández;mig;6000000;Cádiz CF;104
+Perea;mig;4000000;Granada CF;3
+Milla;mig;11000000;Getafe CF;115
+Merquelanz;mig;2244000;Real Sociedad;0
+Guridi;mig;6000000;Deportivo Alavés;0
+Torró;mig;10000000;CA Osasuna;142
+Guillamón;mig;5000000;Valencia CF;101
+Soro;mig;4000000;Granada CF;0
+De Frutos;mig;4000000;Rayo Vallecano;0
+Zubimendi;mig;12000000;Real Sociedad;180
+Tapia;mig;7000000;RC Celta;76
+Pedri;mig;17000000;FC Barcelona;186
+Capoue;mig;7000000;Villarreal CF;128
+Paul Akouokou;mig;5000000;Real Betis;34
+Rodri;mig;7000000;Real Betis;138
+Papu;mig;13000000;Sevilla FC;64
+Álex Baena;mig;12000000;Villarreal CF;146
+Comesaña;mig;7000000;Villarreal CF;161
+José Pozo;mig;4000000;Rayo Vallecano;12
+Darder;mig;13000000;RCD Mallorca;217
+Melendo;mig;5000000;Granada CF;0
+Antonio Sánchez;mig;6000000;RCD Mallorca;77
+De Galarreta;mig;7000000;Athletic Club;132
+Dani Rodríguez;mig;7000000;RCD Mallorca;173
+Baba;mig;7000000;UD Almería;89
+De Paul;mig;17000000;Atlético de Madrid;153
+Óscar Valentín;mig;7000000;Rayo Vallecano;129
+Iván Martín;mig;10000000;Girona FC;121
+Trejo;mig;7000000;Rayo Vallecano;143
+Cervi;mig;7000000;RC Celta;108
+Aleñá;mig;7000000;Getafe CF;113
+Morlanes;mig;7000000;RCD Mallorca;52
+Riquelme;mig;7000000;Atlético de Madrid;158
+Pathé Ciss;mig;6000000;Rayo Vallecano;81
+Kubo;mig;23000000;Real Sociedad;231
+Nteka;mig;11000000;Rayo Vallecano;60
+Robert Navarro;mig;4000000;Real Sociedad;36
+Turrientes;mig;5000000;Real Sociedad;8
+Gavi;mig;7000000;FC Barcelona;171
+Blanco;mig;4000000;Deportivo Alavés;6
+Mascarell;mig;7000000;RCD Mallorca;110
+Camavinga;mig;7000000;Real Madrid;150
+Yangel Herrera;mig;12000000;Girona FC;68
+Gumbau;mig;15000000;Granada CF;160
+Pepelu;mig;10000000;Valencia CF;0
+Ceballos;mig;12000000;Real Madrid;139
+San Emeterio;mig;7000000;Cádiz CF;92
+Alcaraz;mig;7000000;Cádiz CF;140
+Kike Pérez;mig;7000000;Rayo Vallecano;125
+Petrovic;mig;4000000;Granada CF;0
+Uzuni;mig;6000000;Granada CF;0
+Grenier;mig;5000000;RCD Mallorca;44
+Toni Villa;mig;6000000;Girona FC;87
+Robertone;mig;12000000;UD Almería;194
+Arnau Puigmal;mig;7000000;UD Almería;41
+Samu Costa;mig;7000000;RCD Mallorca;102
+Ibrahima Kebé;mig;1000000;Girona FC;0
+Aleix García;mig;7000000;Girona FC;173
+Borja García;mig;3960000;Girona FC;39
+Witsel;mig;7000000;Atlético de Madrid;134
+Tchouaméni;mig;11000000;Real Madrid;149
+Swedberg;mig;4000000;RC Celta;5
+De La Torre;mig;7000000;RC Celta;93
+Aimar Oroz;mig;13000000;CA Osasuna;131
+Javi Hernández;mig;7000000;Cádiz CF;73
+Luiz Henrique;mig;7000000;Real Betis;128
+Almeida;mig;7000000;Valencia CF;174
+Ander Herrera;mig;7000000;Athletic Club;51
+Brian Ocampo;mig;1782000;Cádiz CF;88
+Oriol Romeu;mig;13000000;FC Barcelona;145
+Barrios;mig;7000000;Atlético de Madrid;45
+Youba Diarra;mig;1000000;Cádiz CF;5
+Gonzalo Villar;mig;6000000;Granada CF;28
+Escalante;mig;17000000;Cádiz CF;86
+Pablo Marín;mig;1848000;Real Sociedad;5
+Terrats;mig;7000000;Villarreal CF;51
+Guerra;mig;10000000;Valencia CF;34
+Fran Pérez;mig;6000000;Valencia CF;0
+Marvin;mig;330000;UD Las Palmas;0
+Fabio;mig;2310000;UD Las Palmas;0
+Moleiro;mig;2970000;UD Las Palmas;0
+Loiodice;mig;6000000;UD Las Palmas;0
+Kirian;mig;6000000;UD Las Palmas;0
+Mfulu;mig;4000000;UD Las Palmas;0
+Bodiger;mig;3300000;Granada CF;0
+Sergio Ruiz;mig;6000000;Granada CF;0
+Bryan;mig;6000000;Granada CF;0
+Alkain;mig;5000000;Deportivo Alavés;0
+A Rebbach;mig;4000000;Deportivo Alavés;0
+C Benavidez;mig;5000000;Deportivo Alavés;0
+Brahim;mig;4000000;Real Madrid;0
+Arda Güler;mig;6600000;Real Madrid;0
+Bellingham;mig;34000000;Real Madrid;0
+Altimira;mig;1000000;Getafe CF;0
+Javi Muñoz;mig;6000000;UD Las Palmas;0
+Pablo Torre;mig;4000000;Girona FC;0
+Bamba;mig;11000000;RC Celta;0
+Dotor;mig;4000000;RC Celta;0
+Sow;mig;5000000;Sevilla FC;0
+Dion;mig;5000000;UD Almería;0
+Arribas;mig;6000000;UD Almería;0
+Olasagasti;mig;1000000;Real Sociedad;0
+Gundogan;mig;7000000;FC Barcelona;0
+Marc Roca;mig;5000000;Real Betis;0
+Fermin;mig;4000000;FC Barcelona;0
+Nico Paz;mig;1000000;Real Madrid;0
+Unai G;mig;660000;Athletic Club;0
+Ibañez;mig;6600000;CA Osasuna;0
+Correa;dav;7000000;Atlético de Madrid;135
+Villalibre;dav;4000000;Athletic Club;9
+Iñaki Williams;dav;14000000;Athletic Club;181
+Aspas;dav;6000000;RC Celta;182
+Borja Iglesias;dav;7000000;Real Betis;189
+Mata;dav;7000000;Getafe CF;42
+Morales;dav;6000000;Villarreal CF;104
+Roger;dav;6000000;Cádiz CF;68
+Vinícius Jr;dav;17000000;Real Madrid;227
+Oyarzabal;dav;7000000;Real Sociedad;93
+Portu;dav;6000000;Getafe CF;92
+Munir;dav;7000000;UD Las Palmas;92
+Enes Ünal;dav;7000000;Getafe CF;187
+Gerard;dav;13000000;Villarreal CF;120
+En-Nesyri;dav;10000000;Sevilla FC;127
+Chimy Ávila;dav;6000000;CA Osasuna;135
+Joao Félix;dav;1000000;Atlético de Madrid;69
+Rodrygo;dav;18000000;Real Madrid;218
+Ocampos;dav;7000000;Sevilla FC;67
+Kike Barja;dav;7000000;CA Osasuna;114
+Griezmann;dav;25000000;Atlético de Madrid;311
+Joselu;dav;7000000;Real Madrid;176
+Carlos Fernández;dav;6000000;Real Sociedad;59
+Ansu Fati;dav;7000000;FC Barcelona;142
+Suso;dav;10000000;Sevilla FC;100
+Alejo;dav;6000000;Cádiz CF;64
+Lozano;dav;6000000;Getafe CF;84
+Negredo;dav;3300000;Cádiz CF;57
+Ruibal;dav;7000000;Real Betis;91
+Berenguer;dav;7000000;Athletic Club;150
+Budimir;dav;12000000;CA Osasuna;133
+Miguel Rodríguez;dav;2310000;RC Celta;22
+Camello;dav;7095000;Rayo Vallecano;153
+Yéremy Pino;dav;13000000;Villarreal CF;175
+Álvaro García;dav;11000000;Rayo Vallecano;181
+Isi;dav;12000000;Rayo Vallecano;223
+Andrés;dav;4000000;Rayo Vallecano;21
+Bebé;dav;4000000;Rayo Vallecano;6
+RDT;dav;7000000;Rayo Vallecano;67
+Embarba;dav;12000000;UD Almería;133
+Abdón;dav;5000000;RCD Mallorca;50
+Amath;dav;6000000;RCD Mallorca;75
+Osmajic;dav;4000000;Cádiz CF;0
+Memphis;dav;6000000;Atlético de Madrid;51
+Kike García;dav;6000000;Deportivo Alavés;82
+Sobrino;dav;7000000;Cádiz CF;136
+Marc;dav;4000000;UD Las Palmas;0
+Sandro;dav;6000000;UD Las Palmas;0
+Lamela;dav;7000000;Sevilla FC;118
+Hugo Duro;dav;7000000;Valencia CF;72
+Willian José;dav;7000000;Real Betis;63
+Diego López;dav;12000000;Valencia CF;49
+Rafa Mir;dav;7000000;Sevilla FC;90
+Miguel;dav;4000000;Deportivo Alavés;0
+Sylla;dav;4000000;Deportivo Alavés;0
+Sorloth;dav;11000000;Villarreal CF;189
+Marcos André;dav;4000000;Valencia CF;39
+Falcao;dav;5000000;Rayo Vallecano;55
+Nico Williams;dav;12000000;Athletic Club;182
+Abde;dav;7000000;FC Barcelona;116
+Ferran Torres;dav;7000000;FC Barcelona;116
+Tecatito Corona;dav;5000000;Sevilla FC;15
+Borja Mayoral;dav;7000000;Getafe CF;149
+Muriqi;dav;10000000;RCD Mallorca;196
+Sadiq;dav;4000000;Real Sociedad;31
+Ramazani;dav;6000000;UD Almería;103
+Stuani;dav;7000000;Girona FC;112
+Momo Cho;dav;6000000;Real Sociedad;70
+Guruzeta;dav;7000000;Athletic Club;112
+Morata;dav;10000000;Atlético de Madrid;183
+Samuel Lino;dav;7000000;Atlético de Madrid;177
+Samu Castillejo;dav;6000000;Valencia CF;94
+Raphinha;dav;12000000;FC Barcelona;202
+Lewandowski;dav;18000000;FC Barcelona;269
+Carles Pérez;dav;10000000;RC Celta;155
+Paciencia;dav;6000000;RC Celta;49
+Leo Baptistao;dav;7000000;UD Almería;103
+Latasa;dav;7000000;Getafe CF;39
+Larsen;dav;7000000;RC Celta;103
+Lázaro;dav;7000000;UD Almería;75
+Juan Cruz;dav;4000000;Real Betis;1
+Luis Suárez;dav;7000000;UD Almería;85
+Tsygankov;dav;11000000;Girona FC;116
+Larin;dav;7000000;RCD Mallorca;92
+Machís;dav;7000000;Cádiz CF;31
+Ayoze Pérez;dav;15000000;Real Betis;103
+Chris Ramos;dav;7000000;Cádiz CF;47
+Jonathan Viera;dav;7000000;UD Las Palmas;0
+Pejiño;dav;4000000;UD Las Palmas;0
+Diedhiou;dav;4000000;Granada CF;0
+Callejon;dav;6000000;Granada CF;0
+Sávio;dav;7000000;Girona FC;0
+Herrera;dav;1000000;UD Las Palmas;0
+Ben Brereton;dav;5000000;Villarreal CF;0
+Jose Arnaiz;dav;5000000;CA Osasuna;0
+André Silva;dav;9240000;Real Sociedad;0
+Dovbyk;dav;4000000;Girona FC;0
+Martón;dav;1000000;Athletic Club;0
+Kone;dav;4000000;UD Almería;0
+Lamine Yamal;dav;6000000;FC Barcelona;0
+Fake_por1;por;0;FakeTeam;0
+Fake_por2;por;0;FakeTeam;0
+Fake_por3;por;0;FakeTeam;0
+Fake_por4;por;0;FakeTeam;0
+Fake_por5;por;0;FakeTeam;0
+Fake_def1;def;0;FakeTeam;0
+Fake_def2;def;0;FakeTeam;0
+Fake_def3;def;0;FakeTeam;0
+Fake_def4;def;0;FakeTeam;0
+Fake_def5;def;0;FakeTeam;0
+Fake_mig1;mig;0;FakeTeam;0
+Fake_mig2;mig;0;FakeTeam;0
+Fake_mig3;mig;0;FakeTeam;0
+Fake_mig4;mig;0;FakeTeam;0
+Fake_mig5;mig;0;FakeTeam;0
+Fake_dav1;dav;0;FakeTeam;0
+Fake_dav2;dav;0;FakeTeam;0
+Fake_dav3;dav;0;FakeTeam;0
+Fake_dav4;dav;0;FakeTeam;0
+Fake_dav5;dav;0;FakeTeam;0

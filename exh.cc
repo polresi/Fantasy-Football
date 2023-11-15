@@ -75,7 +75,17 @@ public:
         num_pos[player.pos]--;
     }
 
-    const PlayerList& get_players() const {
+    void complete_team() {// add the remaining player with 0 price from the FakeTeam
+        for (auto& [pos, num_missing] : get_missing_players()) { 
+            for (int i = 0; i < num_missing; i++) {
+                Player player = {"Fake_"+pos+char(i), pos, 0, 0};
+                add_player(player);
+            }
+        }
+    }
+
+    PlayerList& get_players() {
+        complete_team();
         return player_list;
     }
 
@@ -105,6 +115,7 @@ public:
         return player_list.size();
     }
 
+
     map<string, int> get_missing_players() {
         return {{"por", 1 - num_pos["por"]},
                 {"def", query.N1 - num_pos["def"]},
@@ -132,7 +143,7 @@ Query read_query(const string& input_query) {
         }
         file.close();
     } else {
-        cout << "Unable to open the file: " << input_query << endl;
+        cout << "No s'ha pogut obrir l'arxiu: " << input_query << endl;
     }
 
     return query; // Returns an empty query in case of an error.
@@ -177,18 +188,31 @@ PlayerList get_players_list()
  * Recursive function that obtains the best solution using exhaustive search.
  * Modifies the global variable solution, and stores the best partial solution found there
  */
-void exhaustive_search(Solution& partial_solution, int k = 0) {
+void exhaustive_search(string output, Solution& partial_solution, int k = 0) {
 
     if (partial_solution.get_size() > 11) return;
 
     if (partial_solution.get_points() > final_solution.get_points()) { // candidate solution is better than solution
         final_solution = partial_solution;
         
-        cout << "New best solution has been found: ";
-        for (Player p : partial_solution.get_players()) {
-            cout << p.name << ", ";
+        ofstream output_file(output);
+        if (output_file.is_open()) {
+            output_file << "La millor solució fins ara:" << endl;
+            bool first = true;
+            for (Player p : final_solution.get_players()) {
+                if (first) {
+                    first = false;
+                    output_file << p.name;
+                } else {
+                    output_file << ", " << p.name;
+                }
+            }
+            output_file << endl << "Punts: " << final_solution.get_points() << endl;
+            output_file << "Cost: " << final_solution.get_cost() << endl << endl;
+            output_file.close();
+        } else {
+            cout << "No s'ha pogut obrir l'arxiu: " << endl;
         }
-        cout << endl << "Points: " << final_solution.get_points() << endl << endl;
     }
 
     if (partial_solution.get_cost() > query.max_cost) { // this solution will have a higher cost than the maximum
@@ -199,30 +223,20 @@ void exhaustive_search(Solution& partial_solution, int k = 0) {
     for (int i = k; i < player_list.size(); i++) {
         partial_solution.add_player(player_list[i]);
         if (partial_solution.is_valid()) {
-            exhaustive_search(partial_solution, k+1);
+            exhaustive_search(output, partial_solution, k+1);
         }
         partial_solution.pop_last_player();
     }
 }
 
-
 /*
  * Obtains the best solution using exhaustive search.
  * Modifies the global variable solution, and stores the best partial solution found there
  */
-void exhaustive_search() {
+void exhaustive_search(string output) {
     Solution initial_solution = {PlayerList{}, 0, 0};
-    exhaustive_search(initial_solution);
-    
-    // add the remaining player with 0 price from the FakeTeam
-    for (auto& [pos, num_missing] : final_solution.get_missing_players()) {
-        for (int i = 0; i < num_missing; i++) {
-            Player player = {"Fake_"+pos+char(i), pos, 0, 0};
-            final_solution.add_player(player);
-        }
-    }
+    exhaustive_search(output, initial_solution);
 }
-
 
 int main(int argc, char *argv[]) {
     if (argc != 4) { // If the number of the files is not correct
@@ -237,18 +251,5 @@ int main(int argc, char *argv[]) {
     query = read_query(input_query); // llegim la consulta    
     player_list = get_players_list(); // store all the players' info
 
-    exhaustive_search();
-    
-    cout << endl << "-- Query values: --" << endl;
-    cout << "N1: " << query.N1 << endl;
-    cout << "N2: " << query.N2 << endl;
-    cout << "N3: " << query.N3 << endl;
-    cout << "Max cost: " << query.max_cost << endl;
-    cout << "Max price per player: " << query.max_price_per_player << endl;
-
-    cout << endl << "-- Final solution --" << endl;
-    for (Player p : final_solution.get_players()) {
-        cout << p.name << ", " << p.pos << ", " << p.price << ", " << p.points << endl;
-    }
-
+    exhaustive_search(output); // stores the best solution in the global variable solution
 }

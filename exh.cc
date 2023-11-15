@@ -8,16 +8,6 @@
 
 using namespace std;
 
-using PlayerPositionLists = unordered_map<string, vector<Player>>;
-
-
-struct Player
-{
-    string name;
-    string pos;
-    int price;
-    int points;
-};
 
 using Solution = vector<Player>; 
 Solution solution = vector<Player>(11);
@@ -36,8 +26,8 @@ Query read_query(const string& input_query) {
     Query query;
 
     if (file.is_open()) {
-        if (file >> query.n1 >> query.n2 >> query.n3) {
-            if (file >> query.T >> query.J) {
+        if (file >> query.N1 >> query.N2 >> query.N3) {
+            if (file >> query.max_cost >> query.max_cost_per_player) {
                 file.close();
                 return query;
             } else {
@@ -72,7 +62,7 @@ int main(int argc, char *argv[]) {
     string output = argv[3]; // output file
 
     Query query = read_query(input_query); // llegim la consulta
-    vector<Player> player_list = get_players_list(query); // store all the players' info
+    PlayerPositionLists player_position_lists = get_players_list(query); // store all the players' info
 
     cout << query.max_cost << endl;
 }

@@ -2,10 +2,12 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
+
 
 struct Player
 {
@@ -13,7 +15,17 @@ struct Player
     string pos;
     int price;
     int points;
+
+    bool operator==(const Player& other) const {
+        // Compare the members that define equality for Player objects
+        return name == other.name && pos == other.pos && price == other.price && points == other.points;
+    }
+
 };
+
+using PlayerList = vector<Player>;
+PlayerList player_list; // global variable to store all the players
+
 
 struct Query
 {
@@ -24,15 +36,21 @@ struct Query
     int max_price_per_player;
 };
 
-using PlayerList = vector<Player>;
-using PlayerPositionLists = unordered_map<string, PlayerList>;
 
+Query query; // global variable to store the query given
 
 class Solution {
+
 private:
     PlayerList player_list;
     int cost;
     int points;
+    map<string, int> num_pos = {
+        {"por", 0},
+        {"def", 0},
+        {"mig", 0},
+        {"dav", 0}
+    };
 
 public:
     // Constructor
@@ -42,19 +60,37 @@ public:
 
     void add_player(Player& player) {
         player_list.push_back(player);
+        
         cost += player.price;
         points += player.points;
+        num_pos[player.pos]++;
     }
     
-    void remove_last_player() {
+    void pop_last_player() {
         Player player = player_list.back();
         player_list.pop_back();
+
         cost -= player.price;
         points -= player.points;
+        num_pos[player.pos]--;
     }
 
     const PlayerList& get_players() const {
         return player_list;
+    }
+
+    bool is_valid() {
+        if (num_pos["por"] > 1 or num_pos["def"] > query.N1 or num_pos["mig"] > query.N2 or num_pos["dav"] > query.N3) {
+            return false;
+        }
+
+        // check that there are no repeated players
+        for (int i = 0; i < player_list.size() - 1; i++) {
+            if (player_list[i] == player_list.back()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     int get_cost() const {
@@ -64,8 +100,20 @@ public:
     int get_points() const {
         return points;
     }
+
+    int get_size() const {
+        return player_list.size();
+    }
+
+    map<string, int> get_missing_players() {
+        return {{"por", 1 - num_pos["por"]},
+                {"def", query.N1 - num_pos["def"]},
+                {"mig", query.N2 - num_pos["mig"]},
+                {"dav", query.N3 - num_pos["dav"]}};
+    }
 };
 
+Solution final_solution = {PlayerList{}, 0, -1}; // global variable to store the best solution found so far
 
 Query read_query(const string& input_query) {
     ifstream file(input_query);
@@ -93,18 +141,12 @@ Query read_query(const string& input_query) {
 /*
  * Reads the players database in data_base.txt and returns a vector of all the players (name, position, price and points)
  */
-PlayerPositionLists get_players_list(const Query& query)
+PlayerList get_players_list()
 {
     string databaseFile = "data_base.txt";
     ifstream in(databaseFile);
 
-    PlayerPositionLists player_position_lists = { // dictionary 
-        {"por", PlayerList()},
-        {"def", PlayerList()},
-        {"mig", PlayerList()},
-        {"dav", PlayerList()}
-    };
-  
+    PlayerList player_list(0);
     while (not in.eof()) {
         string name, position, club;
         int points, price;
@@ -119,35 +161,48 @@ PlayerPositionLists get_players_list(const Query& query)
         in >> points;
         string aux2;
         getline(in,aux2);
-
         
         if (price > query.max_price_per_player) continue; // filter out the players with higher price than the maximum
-        if (points == 0 and club != "FakeTeam") continue; // we don't store players that have 0 points, except from the last ones
+        if (points == 0) continue; // we don't store players that have 0 points, except from the last ones
 
         Player player = {name, position, price, points};
-        player_position_lists[position].push_back(player);
+        player_list.push_back(player);
     }
     in.close();
 
-  return player_position_lists;
+  return player_list;
 }
 
+/*
+ * Recursive function that obtains the best solution using exhaustive search.
+ * Modifies the global variable solution, and stores the best partial solution found there
+ */
+void exhaustive_search(Solution& partial_solution, int k = 0) {
 
-Solution final_solution = {PlayerList{}, 0, -1}; // global variable to store the best solution found so far
+    if (partial_solution.get_size() > 11) return;
 
-void exhaustive_search(const Query& query, const PlayerPositionLists& player_position_lists, Solution partial_solution){ // ¿¿¿ partial_solution ha de ser una referencia ???
-    if (partial_solution.player_list.size() == 11) { // found a candidate solution
-        if (partial_solution.get_points() > final_solution.get_points()) { // candidate solution is better than solution
-            final_solution = final_solution;
+    if (partial_solution.get_points() > final_solution.get_points()) { // candidate solution is better than solution
+        final_solution = partial_solution;
+        
+        cout << "New best solution has been found: ";
+        for (Player p : partial_solution.get_players()) {
+            cout << p.name << ", ";
         }
-    }
-    
-    if (partial_solution.cost > query.max_cost) { // this solution will never be better than the one already found
-        return;        
+        cout << endl << "Points: " << final_solution.get_points() << endl << endl;
     }
 
-    // iterate over all possible por, def, mig, dav, which fullfull the restrictions N1, N2, N3
-    
+    if (partial_solution.get_cost() > query.max_cost) { // this solution will have a higher cost than the maximum
+        return;
+    }
+
+    // iterate over all possible players from the last player you have added to the solution (to avoid repeated partial solutions)
+    for (int i = k; i < player_list.size(); i++) {
+        partial_solution.add_player(player_list[i]);
+        if (partial_solution.is_valid()) {
+            exhaustive_search(partial_solution, k+1);
+        }
+        partial_solution.pop_last_player();
+    }
 }
 
 
@@ -155,15 +210,23 @@ void exhaustive_search(const Query& query, const PlayerPositionLists& player_pos
  * Obtains the best solution using exhaustive search.
  * Modifies the global variable solution, and stores the best partial solution found there
  */
-void exhaustive_search(const Query& query, const PlayerPositionLists& player_position_lists) {
+void exhaustive_search() {
     Solution initial_solution = {PlayerList{}, 0, 0};
-    exhaustive_search(query, player_position_lists, initial_solution);
+    exhaustive_search(initial_solution);
+    
+    // add the remaining player with 0 price from the FakeTeam
+    for (auto& [pos, num_missing] : final_solution.get_missing_players()) {
+        for (int i = 0; i < num_missing; i++) {
+            Player player = {"Fake_"+pos+char(i), pos, 0, 0};
+            final_solution.add_player(player);
+        }
+    }
 }
 
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) { // si el nombre de fitxers no el correcte.
-        cout << "Us incorrecte. S'han de proporcionar 3 arguments." << endl;
+    if (argc != 4) { // If the number of the files is not correct
+        cout << "Us incorrecte. S'han de proporcionar 3 arguments: data_base, query_file, output_file" << endl;
         return 1; 
     }
 
@@ -171,25 +234,21 @@ int main(int argc, char *argv[]) {
     string input_query = argv[2]; // query input file
     string output = argv[3]; // output file
 
-    Query query = read_query(input_query); // llegim la consulta
-    PlayerPositionLists player_position_lists = get_players_list(query); // store all the players' info
+    query = read_query(input_query); // llegim la consulta    
+    player_list = get_players_list(); // store all the players' info
 
-    // print all the players that fulfill the query:
-    for (auto& position_list : player_position_lists) {
-        cout << position_list.first << ": ";
-        for (auto& player : position_list.second) {
-            cout << player.name << ", ";
-        }
-        cout << endl;
-    }
-
-    // compute the best solution
-    exhaustive_search(query, player_position_lists);
+    exhaustive_search();
     
-    // print the solution
-    for (auto& player : solution.player_list) {
-        cout << player.name << ", ";
+    cout << endl << "-- Query values: --" << endl;
+    cout << "N1: " << query.N1 << endl;
+    cout << "N2: " << query.N2 << endl;
+    cout << "N3: " << query.N3 << endl;
+    cout << "Max cost: " << query.max_cost << endl;
+    cout << "Max price per player: " << query.max_price_per_player << endl;
+
+    cout << endl << "-- Final solution --" << endl;
+    for (Player p : final_solution.get_players()) {
+        cout << p.name << ", " << p.pos << ", " << p.price << ", " << p.points << endl;
     }
-    cout << endl << "Points: " << solution.points << ", Cost: " << solution.cost << endl;
 
 }

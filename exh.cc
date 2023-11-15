@@ -2,29 +2,33 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <sstream>
 #include "parser.cc"
 
 using namespace std;
 
-// struct Player
-// {
-//     string name;
-//     string pos;
-//     int price;
-//     int points;
-// };
+using PlayerPositionLists = unordered_map<string, vector<Player>>;
+
+
+struct Player
+{
+    string name;
+    string pos;
+    int price;
+    int points;
+};
 
 using Solution = vector<Player>; 
 Solution solution = vector<Player>(11);
 
 struct Query
 {
-    int n1;
-    int n2;
-    int n3;
-    int T;
-    int J;
+    int N1;
+    int N2;
+    int N3;
+    int max_cost;
+    int max_cost_per_player;
 };
 
 Query read_query(const string& input_query) {
@@ -51,9 +55,7 @@ Query read_query(const string& input_query) {
 }
 
 
-vector<Player> read_database(const string& input_database) {
 
-}
 
 void exhaustive_search(const Query& query) {
     
@@ -65,12 +67,12 @@ int main(int argc, char *argv[]) {
         return 1; 
     }
 
-    string input_database = argv[1]; // lectura dels jugadors
-    string input_query = argv[2]; // lectura de la consulta
-    string output = argv[3]; // arxiu de sortida
+    string input_database = argv[1]; // players' database
+    string input_query = argv[2]; // query input file
+    string output = argv[3]; // output file
 
-    vector<Player> player_list = get_players_list(); // store all the players' info
     Query query = read_query(input_query); // llegim la consulta
+    vector<Player> player_list = get_players_list(query); // store all the players' info
 
-    cout << query.T << endl;
+    cout << query.max_cost << endl;
 }

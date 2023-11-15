@@ -5,46 +5,48 @@
 using namespace std;
 
 string outputFile;
-struct Player
-{
-    string name;
-    string pos;
-    int price;
-    int points;
-};
 
 
 /*
  * Reads the players database in data_base.txt and returns a vector of all the players (name, position, price and points)
  */
-vector<Player> get_players_list() 
+PlayerPositionLists get_players_list(Query query) 
 {
   string databaseFile = "data_base.txt";
   ifstream in(databaseFile);
-  
-  vector<Player> player_list;
 
+  PlayerPositionLists player_position_lists = {
+    {"por", vector<Player>()},
+    {"def", vector<Player>()},
+    {"mig", vector<Player>()},
+    {"dav", vector<Player>()}
+  };
+  
   while (not in.eof()) {
-    string nom, posicio, club;
-    int punts, preu;
-    getline(in,nom,';');    if (nom == "") break;
-    getline(in,posicio,';');
-    in >> preu;
+    string name, position, club;
+    int points, cost;
+    getline(in, name, ';');
+    if (name == "") break;
+    
+    getline(in, position, ';');
+    in >> cost;
     char aux; in >> aux;
-    getline(in,club,';');
-    in >> punts;
+
+    getline(in, club, ';');
+    in >> points;
     string aux2;
     getline(in,aux2);
     
-    if (preu > ...) continue; //filtrar quan el preu és massa elevat !!!
-    if (punts = 0 and club != "FakeTeam") continue; // we don't store players that have 0 points, except from the last ones
     
-    Player player = {nom, posicio, preu, punts};
-    player_list.push_back(player);
+    if (cost > query.max_cost_per_player) continue; // filtrem quan el cost del jugador és major al cost màxim per jugador
+    if (points = 0 and club != "FakeTeam") continue; // we don't store players that have 0 points, except from the last ones
+
+    Player player = {name, position, cost, points};
+    player_position_lists[position].push_back(player);
   }
   in.close();
 
-  return player_list;
+  return player_position_lists;
 }
 
 

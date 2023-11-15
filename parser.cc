@@ -6,68 +6,7 @@ using namespace std;
 
 string outputFile;
 
-struct Player
-{
-    string name;
-    string pos;
-    int price;
-    int points;
-};
 
-struct Query
-{
-    int N1;
-    int N2;
-    int N3;
-    int max_cost;
-    int max_price_per_player;
-};
-
-
-using PlayerList = vector<Player>;
-using PlayerPositionLists = unordered_map<string, PlayerList>;
-
-/*
- * Reads the players database in data_base.txt and returns a vector of all the players (name, position, price and points)
- */
-PlayerPositionLists get_players_list(const Query& query) 
-{
-    string databaseFile = "data_base.txt";
-    ifstream in(databaseFile);
-
-    PlayerPositionLists player_position_lists = {
-        {"por", vector<Player>()},
-        {"def", vector<Player>()},
-        {"mig", vector<Player>()},
-        {"dav", vector<Player>()}
-    };
-  
-    while (not in.eof()) {
-        string name, position, club;
-        int points, price;
-        getline(in, name, ';');
-        if (name == "") break;
-        
-        getline(in, position, ';');
-        in >> price;
-        char aux; in >> aux;
-
-        getline(in, club, ';');
-        in >> points;
-        string aux2;
-        getline(in,aux2);
-
-        
-        if (price > query.max_price_per_player) continue; // filter out the players with higher price than the maximum
-        if (points == 0 and club != "FakeTeam") continue; // we don't store players that have 0 points, except from the last ones
-
-        Player player = {name, position, price, points};
-        player_position_lists[position].push_back(player);
-    }
-    in.close();
-
-  return player_position_lists;
-}
 
 
 // int main(int argc, char** argv) {

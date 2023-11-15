@@ -4,19 +4,67 @@
 #include <vector>
 #include <unordered_map>
 #include <sstream>
-#include "parser.cc"
 
 using namespace std;
 
-
-struct Solution
+struct Player
 {
-    PlayerList player_list;
-    int cost;
+    string name;
+    string pos;
+    int price;
     int points;
 };
 
-Solution solution = {PlayerList(11), 0, 0};
+struct Query
+{
+    int N1;
+    int N2;
+    int N3;
+    int max_cost;
+    int max_price_per_player;
+};
+
+using PlayerList = vector<Player>;
+using PlayerPositionLists = unordered_map<string, PlayerList>;
+
+
+class Solution {
+private:
+    PlayerList player_list;
+    int cost;
+    int points;
+
+public:
+    // Constructor
+    Solution(PlayerList player_list, int cost, int points) 
+        : player_list(player_list), cost(cost), points(points) {}
+
+
+    void add_player(Player& player) {
+        player_list.push_back(player);
+        cost += player.price;
+        points += player.points;
+    }
+    
+    void remove_last_player() {
+        Player player = player_list.back();
+        player_list.pop_back();
+        cost -= player.price;
+        points -= player.points;
+    }
+
+    const PlayerList& get_players() const {
+        return player_list;
+    }
+
+    int get_cost() const {
+        return cost;
+    }
+    
+    int get_points() const {
+        return points;
+    }
+};
 
 
 Query read_query(const string& input_query) {
@@ -42,12 +90,55 @@ Query read_query(const string& input_query) {
     return query; // Returns an empty query in case of an error.
 }
 
+/*
+ * Reads the players database in data_base.txt and returns a vector of all the players (name, position, price and points)
+ */
+PlayerPositionLists get_players_list(const Query& query)
+{
+    string databaseFile = "data_base.txt";
+    ifstream in(databaseFile);
 
+    PlayerPositionLists player_position_lists = { // dictionary 
+        {"por", PlayerList()},
+        {"def", PlayerList()},
+        {"mig", PlayerList()},
+        {"dav", PlayerList()}
+    };
+  
+    while (not in.eof()) {
+        string name, position, club;
+        int points, price;
+        getline(in, name, ';');
+        if (name == "") break;
+        
+        getline(in, position, ';');
+        in >> price;
+        char aux; in >> aux;
+
+        getline(in, club, ';');
+        in >> points;
+        string aux2;
+        getline(in,aux2);
+
+        
+        if (price > query.max_price_per_player) continue; // filter out the players with higher price than the maximum
+        if (points == 0 and club != "FakeTeam") continue; // we don't store players that have 0 points, except from the last ones
+
+        Player player = {name, position, price, points};
+        player_position_lists[position].push_back(player);
+    }
+    in.close();
+
+  return player_position_lists;
+}
+
+
+Solution final_solution = {PlayerList{}, 0, -1}; // global variable to store the best solution found so far
 
 void exhaustive_search(const Query& query, const PlayerPositionLists& player_position_lists, Solution partial_solution){ // ¿¿¿ partial_solution ha de ser una referencia ???
     if (partial_solution.player_list.size() == 11) { // found a candidate solution
-        if (partial_solution.points > solution.points) { // candidate solution is better than solution
-            solution = partial_solution;
+        if (partial_solution.get_points() > final_solution.get_points()) { // candidate solution is better than solution
+            final_solution = final_solution;
         }
     }
     

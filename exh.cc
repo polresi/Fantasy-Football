@@ -11,9 +11,11 @@ struct Player
     string name;
     string pos;
     int price;
-    string team;
     int points;
 };
+
+using Solution = vector<Player>; 
+Solution solution = vector<Player>(11);
 
 struct Query
 {
@@ -52,6 +54,9 @@ vector<Player> read_database(const string& input_database) {
 
 }
 
+void exhaustive_search(const Query& query) {
+    
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 4) { // si el nombre de fitxers no el correcte.

@@ -12,14 +12,6 @@ using namespace std;
 using Solution = vector<Player>; 
 Solution solution = vector<Player>(11);
 
-struct Query
-{
-    int N1;
-    int N2;
-    int N3;
-    int max_cost;
-    int max_cost_per_player;
-};
 
 Query read_query(const string& input_query) {
     ifstream file(input_query);

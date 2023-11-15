@@ -14,6 +14,16 @@ struct Player
     int points;
 };
 
+struct Query
+{
+    int N1;
+    int N2;
+    int N3;
+    int max_cost;
+    int max_cost_per_player;
+};
+
+
 using PlayerList = vector<Player>;
 using PlayerPositionLists = unordered_map<string, PlayerList>;
 

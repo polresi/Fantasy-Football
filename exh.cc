@@ -3,16 +3,17 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include "parser.cc"
 
 using namespace std;
 
-struct Player
-{
-    string name;
-    string pos;
-    int price;
-    int points;
-};
+// struct Player
+// {
+//     string name;
+//     string pos;
+//     int price;
+//     int points;
+// };
 
 using Solution = vector<Player>; 
 Solution solution = vector<Player>(11);
@@ -68,7 +69,7 @@ int main(int argc, char *argv[]) {
     string input_query = argv[2]; // lectura de la consulta
     string output = argv[3]; // arxiu de sortida
 
-    vector<>
+    vector<Player> player_list = get_players_list(); // store all the players' info
     Query query = read_query(input_query); // llegim la consulta
 
     cout << query.T << endl;

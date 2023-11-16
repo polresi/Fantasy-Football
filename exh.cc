@@ -36,29 +36,18 @@ using PlayerList = vector<Player>; // vector of players
 PlayerList player_list; // Global variable to store all the players
 
 
-class Query
+struct Query
 {
-public:
     int N1;
     int N2;
     int N3;
     int max_cost;
     int max_price_per_player;
-    map<string, uint> max_players_per_position;
-    
-    // Default constructor
-    Query() {}
-    
-    // Constructor
-    Query(int N1, int N2, int N3, int max_cost, int max_price_per_player)
-        : N1(N1), N2(N2), N3(N3), max_cost(max_cost), max_price_per_player(max_price_per_player) 
-    {
-        max_players_per_position = {{"por", 1}, {"def", N1}, {"mig", N2}, {"dav", N3}};
-    }
+    map<string, uint> max_players_per_position = {{"por", 1}, {"def", N1}, {"mig", N2}, {"dav", N3}};
 };
 
-
 Query query; // global variable to store the query given
+
 
 class Solution {
 

@@ -142,11 +142,10 @@ public:
                 // print the time it took to obtain the solution
                 output_file << pos_to_CAPS[pos] << ": ";
                 PlayerList all_players = players[pos];
-                // add fake players to complete the team
 
+                // add fake players to complete the team
                 auto fake_players = get_fake_players(pos);
                 all_players.insert(all_players.end(), fake_players.begin(), fake_players.end());
-                // all_players.insert(all_players.end(), get_fake_players(pos).begin(), get_fake_players(pos).end()); 
                 bool first = true;
                 for (Player p : all_players) {
                     if (first) {
@@ -264,6 +263,6 @@ int main(int argc, char *argv[]) {
 
     query = read_query(input_query); // llegim la consulta    
     player_list = get_players_list(); // store all the players' info
-
+    
     exhaustive_search(output_file); // stores the best solution in the global variable solution
 }

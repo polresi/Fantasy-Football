@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 
+
 using namespace std;
 
 
@@ -143,10 +144,10 @@ public:
         ofstream output_file(filename);
         if (output_file.is_open()) {
             auto end = chrono::high_resolution_clock::now(); // stop the timer
-            auto duration = chrono::duration_cast<std::chrono::seconds>(end - start).count();
+            auto duration = chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             output_file << fixed;
             output_file.precision(1);
-            output_file << duration << endl;
+            output_file << duration/1000.0 << endl;
 
             for (auto pos : positions) {    
                 // print the time it took to obtain the solution

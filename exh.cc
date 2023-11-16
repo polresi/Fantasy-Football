@@ -77,8 +77,8 @@ public:
 
     void complete_team() {// add the remaining player with 0 price from the FakeTeam
         for (auto& [pos, num_missing] : get_missing_players()) { 
-            for (int i = 0; i < num_missing; i++) {
-                Player player = {"Fake_"+pos+char(i), pos, 0, 0};
+            for (uint i = 0; i < num_missing; i++) {
+                Player player = {"Fake_"+pos+char('1'+i), pos, 0, 0};
                 add_player(player);
             }
         }
@@ -95,7 +95,7 @@ public:
         }
 
         // check that there are no repeated players
-        for (int i = 0; i < player_list.size() - 1; i++) {
+        for (uint i = 0; i < player_list.size() - 1; i++) {
             if (player_list[i] == player_list.back()) {
                 return false;
             }
@@ -116,7 +116,7 @@ public:
     }
 
 
-    map<string, int> get_missing_players() {
+    map<string, uint> get_missing_players() {
         return {{"por", 1 - num_pos["por"]},
                 {"def", query.N1 - num_pos["def"]},
                 {"mig", query.N2 - num_pos["mig"]},
@@ -220,7 +220,7 @@ void exhaustive_search(string output, Solution& partial_solution, int k = 0) {
     }
 
     // iterate over all possible players from the last player you have added to the solution (to avoid repeated partial solutions)
-    for (int i = k; i < player_list.size(); i++) {
+    for (uint i = k; i < player_list.size(); i++) {
         partial_solution.add_player(player_list[i]);
         if (partial_solution.is_valid()) {
             exhaustive_search(output, partial_solution, k+1);

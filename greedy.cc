@@ -108,7 +108,7 @@ public:
         return points;
     }
 
-    int get_size() { // returns the number of players in the solution
+    uint get_size() { // returns the number of players in the solution
         int size = 0;
         for (auto pos : positions) {
             size += players[pos].size();
@@ -216,12 +216,19 @@ void greedy(string output_file) {
     sort(player_list.begin(), player_list.end(), [](const Player& a, const Player& b) {
         return a.density*a.points > b.density*b.points;
     });
-    for (auto p : player_list) {
-        cout << p.name << " " << p.pos << " " << p.price << " " << p.points << " " << p.density << endl;
+
+    Solution solution;
+    for (uint i = 0; i < player_list.size(); ++i) {
+        if (solution.get_size() == 11) break;
+        solution.add_player(player_list[i]);
+        if (not solution.is_valid()) {
+            solution.pop_last_player(player_list[i].pos);
+        }
     }
+
+    solution.write(output_file);
+    
 }
-
-
 
 int main(int argc, char *argv[]) {
     if (argc != 4) { // If the number of the files is not correct

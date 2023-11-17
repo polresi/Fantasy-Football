@@ -15,6 +15,7 @@ using namespace std;
 const vector<string> positions = {"por", "def", "mig", "dav"}; // all the possible positions
 map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}};
 
+string output_filename;
 chrono::time_point <chrono::high_resolution_clock> start;
 
 
@@ -129,18 +130,18 @@ public:
     }
     
     // Writes the solution in the output file
-    void write(string filename) { 
-        ofstream output_file(filename);
-        if (output_file.is_open()) {
+    void write() { 
+        ofstream output(output_filename);
+        if (output.is_open()) {
             auto end = chrono::high_resolution_clock::now(); // stop the timer
             auto duration = chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-            output_file << fixed;
-            output_file.precision(1);
-            output_file << duration/1000.0 << endl;
+            output << fixed;
+            output.precision(1);
+            output << duration/1000.0 << endl;
 
             for (auto pos : positions) {    
                 // print the time it took to obtain the solution
-                output_file << pos_to_CAPS[pos] << ": ";
+                output << pos_to_CAPS[pos] << ": ";
                 PlayerList all_players = players[pos];
 
                 // add fake players to complete the team
@@ -150,16 +151,16 @@ public:
                 for (Player p : all_players) {
                     if (first) {
                         first = false;
-                        output_file << p.name;
+                        output << p.name;
                     } else {
-                        output_file << ";" << p.name;
+                        output << ";" << p.name;
                     }
                 }
-                output_file << endl;
+                output << endl;
             }
-            output_file << "Punts: " << points << endl;
-            output_file << "Preu: " << cost << endl << endl;
-            output_file.close();
+            output << "Punts: " << points << endl;
+            output << "Preu: " << cost << endl << endl;
+            output.close();
         } else {
             cout << "No s'ha pogut obrir l'arxiu: " << endl;
         }
@@ -216,24 +217,24 @@ PlayerList get_players_list()
  * Recursive function that obtains the best solution using exhaustive search.
  * Modifies the global variable solution, and stores the best partial solution found there
  */
-void exhaustive_search(string output_file, Solution& partial_solution, int k = 0) {
+void exhaustive_search(Solution& partial_solution, int k = 0) {
     
     if (partial_solution.get_size() > 11) return;
 
     if (partial_solution.get_cost() > query.max_cost) return; // this solution will have a higher cost than the maximum
 
-
     // candidate solution is better than solution
     if (partial_solution.get_points() > final_solution.get_points()) {
         final_solution = partial_solution;
-        final_solution.write(output_file);
+        final_solution.write();
     }
+    
     // iterate over all possible players from the last player you have added to the solution (to avoid repeated partial solutions)
     for (uint i = k; i < player_list.size(); i++) {
         partial_solution.add_player(player_list[i]);
         string pos = player_list[i].pos;
         if (partial_solution.is_valid()) {
-            exhaustive_search(output_file, partial_solution, k+1);
+            exhaustive_search(partial_solution, k+1);
         }
         partial_solution.pop_last_player(pos);
     }
@@ -243,9 +244,9 @@ void exhaustive_search(string output_file, Solution& partial_solution, int k = 0
  * Obtains the best solution using exhaustive search.
  * Modifies the global variable solution, and stores the best partial solution found there
  */
-void exhaustive_search(string output_file) {
+void exhaustive_search() {
     Solution initial_solution;
-    exhaustive_search(output_file, initial_solution);
+    exhaustive_search(initial_solution);
 }
 
 
@@ -259,10 +260,10 @@ int main(int argc, char *argv[]) {
 
     string input_database = argv[1]; // players' database
     string input_query = argv[2]; // query input file
-    string output_file = argv[3]; // output file
+    output_filename = argv[3]; // output file
 
     query = read_query(input_query); // llegim la consulta    
     player_list = get_players_list(); // store all the players' info
     
-    exhaustive_search(output_file); // stores the best solution in the global variable solution
+    exhaustive_search(); // stores the best solution in the global variable solution
 }

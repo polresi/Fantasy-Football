@@ -44,7 +44,7 @@ struct Query
     int N3;
     int max_cost;
     int max_price_per_player;
-    map<string, uint> max_players_per_position = {{"por", 1}, {"def", N1}, {"mig", N2}, {"dav", N3}};
+    map<string, uint> max_num_players = {{"por", 1}, {"def", N1}, {"mig", N2}, {"dav", N3}};
 };
 
 Query query; // global variable to store the query given
@@ -59,6 +59,7 @@ private:
     string last_pos_added; // last position added to the solution
 
 public:
+
     // Default constructor
     Solution() : cost(0), points(0), last_pos_added("") {
         for (auto pos : positions) {
@@ -87,17 +88,12 @@ public:
         points -= player.points;
     }
 
-    bool is_valid() {
-        for (auto pos : positions) {
-            if (players[pos].size() > query.max_players_per_position[pos]) {
-                return false;
-            }
-        }
-        // check that there are no repeated players        
-        for (uint i = 0; i < players[last_pos_added].size() - 1; i++) {
-            if (players[last_pos_added][i] == players[last_pos_added].back()) {
-                return false;
-            }
+    bool can_be_added(Player& player) {
+        if (players[player.pos].size() + 1 > query.max_num_players[player.pos]) return false;
+
+        // check that there are no repeated players
+        for (Player p : players[player.pos]) {
+            if (p == player) return false;
         }
         return true;
     }
@@ -118,57 +114,60 @@ public:
         return size;
     }
 
+    
+    // Writes the solution in the output file
+    void write() { 
+        ofstream output(output_filename);
+        auto end = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        output << fixed;
+        output.precision(1);
+        output << duration/1000.0 << endl;
+
+        for (auto pos : positions) {    
+            output << pos_to_CAPS[pos] << ": ";
+            write_players(pos, output);
+
+        }
+        output << "Punts: " << points << endl;
+        output << "Preu: " << cost << endl << endl;
+        output.close();
+    }
+
+
+private:
+
+    // Writes the players of a given position in the output files
+    void write_players(string pos, ofstream& output) {
+        PlayerList all_players = players[pos];
+        // add fake players to complete the team
+        PlayerList fake_players = get_fake_players(pos);
+        all_players.insert(all_players.end(), fake_players.begin(), fake_players.end());
+        bool first = true;
+        for (Player p : all_players) {
+            if (first) {
+                first = false;
+                output << p.name;
+            } else {
+                output << ";" << p.name;
+            }
+        }
+        output << endl;
+    }
 
     PlayerList get_fake_players(string pos) {
         PlayerList p_list;
-        uint num_players = query.max_players_per_position[pos] - players[pos].size();
+        uint num_players = query.max_num_players[pos] - players[pos].size();
         for (uint i = 0; i < num_players; i++) {
             Player player = {"Fake_"+pos+char('1'+i), pos, 0, 0};
             p_list.push_back(player);
         }
         return p_list;
     }
-    
-    // Writes the solution in the output file
-    void write() { 
-        ofstream output(output_filename);
-        if (output.is_open()) {
-            auto end = chrono::high_resolution_clock::now(); // stop the timer
-            auto duration = chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-            output << fixed;
-            output.precision(1);
-            output << duration/1000.0 << endl;
-
-            for (auto pos : positions) {    
-                // print the time it took to obtain the solution
-                output << pos_to_CAPS[pos] << ": ";
-                PlayerList all_players = players[pos];
-
-                // add fake players to complete the team
-                auto fake_players = get_fake_players(pos);
-                all_players.insert(all_players.end(), fake_players.begin(), fake_players.end());
-                bool first = true;
-                for (Player p : all_players) {
-                    if (first) {
-                        first = false;
-                        output << p.name;
-                    } else {
-                        output << ";" << p.name;
-                    }
-                }
-                output << endl;
-            }
-            output << "Punts: " << points << endl;
-            output << "Preu: " << cost << endl << endl;
-            output.close();
-        } else {
-            cout << "No s'ha pogut obrir l'arxiu: " << endl;
-        }
-    }
 
 };
 
-Solution final_solution; // global variable to store the best solution found so far
+Solution best_solution; // global variable to store the best solution found so far
 
 
 Query read_query(const string& input_query) {
@@ -178,10 +177,11 @@ Query read_query(const string& input_query) {
     return {N1, N2, N3, max_cost, max_price_per_player};
 }
 
+
 /*
  * Reads the players database in data_base.txt and returns a vector of all the players (name, position, price and points)
  */
-PlayerList get_players_list()
+PlayerList read_players_list()
 {
     string databaseFile = "data_base.txt";
     ifstream in(databaseFile);
@@ -217,26 +217,27 @@ PlayerList get_players_list()
  * Recursive function that obtains the best solution using exhaustive search.
  * Modifies the global variable solution, and stores the best partial solution found there
  */
-void exhaustive_search(Solution& partial_solution, int k = 0) {
+void exhaustive_search(Solution& solution, int k = 0) {
     
-    if (partial_solution.get_size() > 11) return;
+    if (solution.get_size() > 11) return;
 
-    if (partial_solution.get_cost() > query.max_cost) return; // this solution will have a higher cost than the maximum
+    if (solution.get_cost() > query.max_cost) return; // this solution will have a higher cost than the maximum
 
     // candidate solution is better than solution
-    if (partial_solution.get_points() > final_solution.get_points()) {
-        final_solution = partial_solution;
-        final_solution.write();
+    if (solution.get_points() > best_solution.get_points()) {
+        best_solution = solution;
+        best_solution.write();
     }
     
     // iterate over all possible players from the last player you have added to the solution (to avoid repeated partial solutions)
     for (uint i = k; i < player_list.size(); i++) {
-        partial_solution.add_player(player_list[i]);
-        string pos = player_list[i].pos;
-        if (partial_solution.is_valid()) {
-            exhaustive_search(partial_solution, k+1);
+        Player player = player_list[i];
+        
+        if (solution.can_be_added(player)) {
+            solution.add_player(player);
+            exhaustive_search(solution, i+1);
+            solution.pop_last_player(player.pos);
         }
-        partial_solution.pop_last_player(pos);
     }
 }
 
@@ -263,7 +264,7 @@ int main(int argc, char *argv[]) {
     output_filename = argv[3]; // output file
 
     query = read_query(input_query); // llegim la consulta    
-    player_list = get_players_list(); // store all the players' info
+    player_list = read_players_list(); // store all the players' info
     
     exhaustive_search(); // stores the best solution in the global variable solution
 }

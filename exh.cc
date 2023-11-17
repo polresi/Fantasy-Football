@@ -90,8 +90,8 @@ public:
 
     bool can_be_added(Player& player) {
         if (players[player.pos].size() + 1 > query.max_num_players[player.pos]) return false;
+        if (cost + player.price > query.max_cost) return false;
 
-        // check that there are no repeated players
         for (Player p : players[player.pos]) {
             if (p == player) return false;
         }
@@ -127,13 +127,12 @@ public:
         for (auto pos : positions) {    
             output << pos_to_CAPS[pos] << ": ";
             write_players(pos, output);
-
         }
+
         output << "Punts: " << points << endl;
         output << "Preu: " << cost << endl << endl;
         output.close();
     }
-
 
 private:
 

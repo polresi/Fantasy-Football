@@ -218,8 +218,17 @@ PlayerList read_players_list()
  * It sorts the players by density (points/price) and adds them to the solution if they are valid.
  */
 void greedy() {
-    sort(player_list.begin(), player_list.end(), [](const Player& a, const Player& b) {
-        return a.density*a.points > b.density*b.points;
+    int max_points = 0;
+    double max_density = 0.0;
+    for (Player player : player_list) {
+        max_points = max(max_points, player.points);
+        max_density = max(max_density, player.density);
+    }
+
+    double alpha = max_points / max_density;
+
+    sort(player_list.begin(), player_list.end(), [alpha](const Player& a, const Player& b) {
+        return a.points + alpha * a.density > b.points + alpha * b.density;
     });
 
     Solution solution;

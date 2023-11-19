@@ -30,14 +30,8 @@ def get_avg(diff: str) -> float:
         
 def main():
     subprocess.run(["g++", "greedy.cc", "-O3", "-o", "greedy", "-Wall"])
-    print("--- easy ---")
-    print(get_avg('easy'))
-
-    print("--- med ---")
-    print(get_avg('med'))
-    
-    print("--- hard ---")
-    print(get_avg('hard'))
+    for diff in ('easy', 'med', 'hard'):
+        print(f'{diff} : {get_avg(diff)}')
 
 if __name__ == '__main__':
     main()

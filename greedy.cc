@@ -119,6 +119,7 @@ public:
 
     /*
      * Obtains the best player that can be added to the solution, and adds it to the solution.
+     * It uses a heuristic that depends on the max_cost of the query
      * Returns false if no player can be added.
      */
     bool add_best_player() {
@@ -127,14 +128,16 @@ public:
         }), player_list.end());
 
         if (player_list.empty()) return false;
-        // double alpha = f(max_cost, available_money, ...)
+        // alpha is a parameter that depends on the maximum cost of the team of medium test and query 
+        double alpha = 1.6 * pow(query.max_cost / 75000000, 2);
         PlayerList::iterator best_player_it;
+        
         if (get_size() < 10) { // we're not adding the last player
-            best_player_it = max_element(player_list.begin(), player_list.end(), [](const Player& a, const Player& b) {
-                return pow(a.points, 2) * a.density < pow(b.points, 2) * b.density;
+            best_player_it = max_element(player_list.begin(), player_list.end(), [alpha](const Player& a, const Player& b) {
+                return pow(a.points, alpha) * a.density < pow(b.points, alpha) * b.density;
             });
         } else {
-            best_player_it = max_element(player_list.begin(), player_list.end(), [](const Player& a, const Player& b) {
+            best_player_it = max_element(player_list.begin(), player_list.end(), [alpha](const Player& a, const Player& b) {
                 return a.points < b.points;
             });
         }

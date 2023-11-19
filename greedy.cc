@@ -27,7 +27,6 @@ struct Player
     string pos;
     int price;
     int points;
-    double density = price ? double(points)/price : 0.0;
 
     bool operator==(const Player& other) const {
         // Compare the members that define equality for Player objects
@@ -128,21 +127,21 @@ public:
         }), player_list.end());
 
         if (player_list.empty()) return false;
+
         // alpha is a parameter that depends on the maximum cost of the team of medium test and query 
-        const double alpha = 1.6 * pow(query.max_cost / 75000000, 2);
-        PlayerList::iterator best_player_it;
+        const double alpha = 1.5 * pow(query.max_cost / 75e6, 2);
         
+        Player best_player;
         if (get_size() < 10) { // we're not adding the last player
-            best_player_it = max_element(player_list.begin(), player_list.end(), [alpha](const Player& a, const Player& b) {
-                return pow(a.points, alpha) * a.density < pow(b.points, alpha) * b.density;
-            });
-        } else {
-            best_player_it = max_element(player_list.begin(), player_list.end(), [alpha](const Player& a, const Player& b) {
-                return a.points < b.points;
+            best_player = *max_element(player_list.begin(), player_list.end(), [alpha](const Player& a, const Player& b) {
+                return pow(a.points, alpha + 1) / a.price < pow(b.points, alpha + 1) / b.price; // sort by points^alpha * density,
+            });                                                                                 // where density = points/price
+        } else { // we're adding the last player
+            best_player = *max_element(player_list.begin(), player_list.end(), [alpha](const Player& a, const Player& b) {
+                return a.points < b.points; // get the player with most points
             });
         }
 
-        Player best_player = *best_player_it;
         add_player(best_player);
         return true;
     }

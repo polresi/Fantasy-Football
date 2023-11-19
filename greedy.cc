@@ -109,7 +109,7 @@ public:
         return points;
     }
 
-    int get_size() { // returns the number of players in the solution
+    uint get_size() { // returns the number of players in the solution
         int size = 0;
         for (auto pos : positions) {
             size += players[pos].size();
@@ -129,7 +129,7 @@ public:
 
         if (player_list.empty()) return false;
         // alpha is a parameter that depends on the maximum cost of the team of medium test and query 
-        double alpha = 1.6 * pow(query.max_cost / 75000000, 2);
+        const double alpha = 1.6 * pow(query.max_cost / 75000000, 2);
         PlayerList::iterator best_player_it;
         
         if (get_size() < 10) { // we're not adding the last player

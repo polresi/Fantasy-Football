@@ -6,6 +6,7 @@
 #include <sstream>
 #include <algorithm>
 #include <chrono>
+#include <random>
 
 
 using namespace std;
@@ -114,6 +115,30 @@ public:
         return size;
     }
 
+    bool is_valid() {
+        for (auto pos : positions) {
+            if (players[pos].size() > query.max_num_players[pos]) {
+                return false;
+            }
+        }
+        // check that there are no repeated players        
+        for (uint i = 0; i < players[last_pos_added].size() - 1; i++) {
+            if (players[last_pos_added][i] == players[last_pos_added].back()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    void remove_player(const Player& p) {
+        players[p.pos].erase(remove(players[p.pos].begin(), players[p.pos].end(), p), players[p.pos].end());
+    }
+
+    PlayerList operator[](string pos) {
+        return players[pos];
+    }
+
     
     // Writes the solution in the output file
     void write() { 
@@ -128,7 +153,7 @@ public:
             output << pos_to_CAPS[pos] << ": ";
             write_players(pos, output);
         }
-
+        
         output << "Punts: " << points << endl;
         output << "Preu: " << cost;
         output.close();
@@ -167,6 +192,7 @@ private:
 };
 
 Solution best_solution; // global variable to store the best solution found so far
+using Population = vector<Solution>;
 
 
 Query read_query(const string& input_query) {
@@ -212,41 +238,118 @@ PlayerList read_players_list()
   return player_list;
 }
 
-/*
- * Recursive function that obtains the best solution using exhaustive search.
- * Modifies the global variable solution, and stores the best partial solution found there
- */
-void exhaustive_search(Solution& solution, int k = 0) {
-    
-    if (solution.get_size() > 11) return;
 
-    if (solution.get_cost() > query.max_cost) return; // this solution will have a higher cost than the maximum
-
-    // candidate solution is better than solution
-    if (solution.get_points() > best_solution.get_points()) {
-        best_solution = solution;
-        best_solution.write();
-    }
-    
-    // iterate over all possible players from the last player you have added to the solution (to avoid repeated partial solutions)
-    for (uint i = k; i < player_list.size(); i++) {
-        Player player = player_list[i];
-        
-        if (solution.can_be_added(player)) {
-            solution.add_player(player);
-            exhaustive_search(solution, i+1);
-            solution.pop_last_player(player.pos);
-        }
-    }
+int fitness(Solution solution){ // returns the fitness of a solution
+    if (not solution.is_valid()) return 0; // penalize the solutions that exceed the maximum cost
+    return solution.get_points();
 }
 
-/*
- * Obtains the best solution using exhaustive search.
- * Modifies the global variable solution, and stores the best partial solution found there
- */
-void exhaustive_search() {
-    Solution initial_solution;
-    exhaustive_search(initial_solution);
+pair<Solution, Solution> select_parents(Population population) {
+    // Select two random solutions from the population
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<int> dist(0, population.size() - 1);
+    
+    int index1 = dist(gen);
+    int index2 = dist(gen);
+
+    Solution solution1 = population[index1];
+    Solution solution2 = population[index2];
+    return {solution1, solution2};
+}
+
+Population recombine(Solution solution1, Solution solution2) {
+    Population combined_solutions;
+    Solution new_solution = solution1;
+    
+    for (auto pos : positions){
+
+        for (uint i = 0; i < new_solution[pos].size(); ++i) {
+            if (rand() % 2 == 0) {
+                new_solution.remove_player(new_solution[pos][i]); // solution[pos] == solution.player[pos]
+                new_solution.add_player(solution2[pos][i]);
+            }
+        }
+        combined_solutions.push_back(new_solution);
+    }
+    return combined_solutions;
+}
+
+void mutate(Solution solution) {
+    int mutation_rate = 0.1 * solution.get_size(); 
+    for (auto pos : positions) {
+        for (Player p : solution[pos]) {
+            if ((rand() / static_cast<double>(RAND_MAX)) < mutation_rate){
+                solution.remove_player(p);
+            }
+        }
+    }
+    return;
+}
+
+Population recombine_and_mutate(Solution solution1, Solution solution2) {
+    Population combined_solutions = recombine(solution1, solution2);
+    for (Solution solution : combined_solutions) {
+        mutate(solution);
+    }
+    return combined_solutions;
+}
+
+Population select_individuals(Population solutions, ulong num_selected) {
+    Population selected_solutions;
+
+    sort (solutions.begin(), solutions.end(), [](const Solution& s1, const Solution& s2) {
+        return fitness(s1) > fitness(s2);
+    });
+
+    for (int i = 0; i < min(num_selected, solutions.size()); i++) {
+        selected_solutions.push_back(solutions[i]);
+    }
+    return selected_solutions;
+    // while (num_selected < 2) {
+    //     int index = rand() % solutions.size();
+    //     Solution solution = solutions[index];
+    //     if (rand() / static_cast<double>(RAND_MAX) < fitness(solution)) {
+    //         selected_solutions.push_back(solution);
+    //         num_selected++;
+    //     }
+    // }
+    // return selected_solutions;
+}
+
+Population generate_initial_population() { // Use greedy algorithm to generate an initial solution
+    Solution solution;
+    const double alpha = 1.6 * pow(query.max_cost / 75000000, 2); // the greedy algorithm works best with this parameter
+
+    sort(player_list.begin(), player_list.end(), [alpha](const Player& p1, const Player& p2) {
+        return pow(p1.points, alpha + 1) / p1.price > pow(p2.points, alpha + 1) / p2.price;
+    });
+
+    for (Player p : player_list) {
+        if (solution.can_be_added(p)) {
+            solution.add_player(p);
+        }
+    }
+    return {solution};
+}
+
+void metaheuristica(int num_selected) {
+
+    Population population = generate_initial_population();
+    uint gen = 0;
+    while (true){
+        cout << gen++ << endl;
+        auto [parent1, parent2] = select_parents(population);
+        Population population = recombine_and_mutate(parent1, parent2);
+        population = select_individuals(population, num_selected);
+        
+        for (auto solution : population) {
+            if (solution.get_points() > best_solution.get_points()) {
+                best_solution = solution;
+                best_solution.write();
+            }
+        }
+    }
 }
 
 
@@ -264,6 +367,7 @@ int main(int argc, char *argv[]) {
 
     query = read_query(input_query); // llegim la consulta    
     player_list = read_players_list(); // store all the players' info
-    
-    exhaustive_search(); // stores the best solution in the global variable solution
+
+    ulong num_selected = 100; // parameter: number of solutions selected in each iteration
+    metaheuristica(num_selected); 
 }

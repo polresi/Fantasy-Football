@@ -6,6 +6,8 @@
 #include <sstream>
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <cassert>
 
 
 using namespace std;
@@ -89,7 +91,7 @@ public:
         points -= player.points;
     }
 
-    bool can_be_added(Player& player) {
+    bool can_be_added(const Player& player) {
         if (players[player.pos].size() + 1 > query.max_num_players[player.pos]) return false;
         if (cost + player.price > query.max_cost) return false;
 
@@ -115,6 +117,33 @@ public:
         return size;
     }
 
+    /*
+     * Obtains the best player that can be added to the solution, and adds it to the solution.
+     * Returns false if no player can be added.
+     */
+    bool add_best_player() {
+        player_list.erase(remove_if(player_list.begin(), player_list.end(), [this](Player p){
+        return not can_be_added(p); // filters out the players that can't be added
+        }), player_list.end());
+
+        if (player_list.empty()) return false;
+        
+        PlayerList::iterator best_player_it;
+        if (get_size() == 11) {
+            best_player_it = max_element(player_list.begin(), player_list.end(), [](const Player& a, const Player& b) {
+                return a.points < b.points;
+            }); 
+        }
+        else {
+            best_player_it = max_element(player_list.begin(), player_list.end(), [](const Player& a, const Player& b) {
+                return a.points * a.density < b.points * b.density;
+            });
+        }
+        Player best_player = *best_player_it;
+        add_player(best_player);
+        return true;
+    }
+
     
     // Writes the solution in the output file
     void write() { 
@@ -125,12 +154,12 @@ public:
         output.precision(1);
         output << duration/1000.0 << endl;
 
-        for (auto pos : positions) {    
+        for (auto pos : positions) {
             output << pos_to_CAPS[pos] << ": ";
             write_players(pos, output);
         }
         output << "Punts: " << points << endl;
-        output << "Preu: " << cost << endl << endl;
+        output << "Preu: " << cost;
         output.close();
     }
 
@@ -202,14 +231,25 @@ PlayerList read_players_list()
         getline(in,aux2);
         
         if (price > query.max_price_per_player) continue; // filter out the players with higher price than the maximum
-        if (points == 0) continue; // we don't store players that have 0 points, except from the last ones
+        if (points == 0) continue; // we don't store players that have 0 points
 
         Player player = {name, position, price, points};
         player_list.push_back(player);
     }
     in.close();
-
   return player_list;
+}
+
+
+void greedy(Solution solution) {
+    // for (auto p: player_list) {
+    //     cout << p.name << endl;
+    // }
+    if (solution.add_best_player()){
+        greedy(solution);
+    } else {
+        solution.write();
+    }
 }
 
 
@@ -218,30 +258,8 @@ PlayerList read_players_list()
  * It sorts the players by density (points/price) and adds them to the solution if they are valid.
  */
 void greedy() {
-    int max_points = 0;
-    double max_density = 0.0;
-    for (Player player : player_list) {
-        max_points = max(max_points, player.points);
-        max_density = max(max_density, player.density);
-    }
-
-    double alpha = max_points / max_density;
-
-    sort(player_list.begin(), player_list.end(), [alpha](const Player& a, const Player& b) {
-        return a.points + alpha * a.density > b.points + alpha * b.density;
-    });
-
     Solution solution;
-    for (uint i = 0; i < player_list.size(); ++i) {
-        if (solution.get_size() == 11) break;
-
-        if (solution.can_be_added(player_list[i])) {
-            solution.add_player(player_list[i]);
-        }
-    }
-
-    solution.write();
-    
+    greedy(solution);    
 }
 
 

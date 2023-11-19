@@ -123,22 +123,22 @@ public:
      */
     bool add_best_player() {
         player_list.erase(remove_if(player_list.begin(), player_list.end(), [this](Player p){
-        return not can_be_added(p); // filters out the players that can't be added
+            return not can_be_added(p); // filters out the players that can't be added
         }), player_list.end());
 
         if (player_list.empty()) return false;
-        
+        // double alpha = f(max_cost, available_money, ...)
         PlayerList::iterator best_player_it;
-        if (get_size() == 11) {
+        if (get_size() < 10) { // we're not adding the last player
+            best_player_it = max_element(player_list.begin(), player_list.end(), [](const Player& a, const Player& b) {
+                return pow(a.points, 2) * a.density < pow(b.points, 2) * b.density;
+            });
+        } else {
             best_player_it = max_element(player_list.begin(), player_list.end(), [](const Player& a, const Player& b) {
                 return a.points < b.points;
-            }); 
-        }
-        else {
-            best_player_it = max_element(player_list.begin(), player_list.end(), [](const Player& a, const Player& b) {
-                return a.points * a.density < b.points * b.density;
             });
         }
+
         Player best_player = *best_player_it;
         add_player(best_player);
         return true;
@@ -242,10 +242,7 @@ PlayerList read_players_list()
 
 
 void greedy(Solution solution) {
-    // for (auto p: player_list) {
-    //     cout << p.name << endl;
-    // }
-    if (solution.add_best_player()){
+    if (solution.add_best_player()){ // modifies solution, returns false when no player can be added
         greedy(solution);
     } else {
         solution.write();

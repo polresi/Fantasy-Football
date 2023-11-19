@@ -29,6 +29,7 @@ def get_avg(diff: str) -> float:
 
         
 def main():
+    subprocess.run(["g++", "greedy.cc", "-O3", "-o", "greedy", "-Wall"])
     print("--- easy ---")
     print(get_avg('easy'))
 

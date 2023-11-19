@@ -124,13 +124,13 @@ public:
         output.precision(1);
         output << duration/1000.0 << endl;
 
-        for (auto pos : positions) {    
+        for (auto pos : positions) {
             output << pos_to_CAPS[pos] << ": ";
             write_players(pos, output);
         }
-
+        
         output << "Punts: " << points << endl;
-        output << "Preu: " << cost << endl << endl;
+        output << "Preu: " << cost;
         output.close();
     }
 

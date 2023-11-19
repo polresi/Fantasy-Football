@@ -27,7 +27,7 @@ struct Player
     string pos;
     int price;
     int points;
-    double density = price ? double(points)/price : 0;
+    double density = price ? double(points)/price : 0.0;
 
     bool operator==(const Player& other) const {
         // Compare the members that define equality for Player objects
@@ -161,6 +161,7 @@ public:
             output << pos_to_CAPS[pos] << ": ";
             write_players(pos, output);
         }
+        
         output << "Punts: " << points << endl;
         output << "Preu: " << cost;
         output.close();

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cassert>
 
 
 using namespace std;
@@ -35,7 +36,8 @@ struct Player
 };
 
 using PlayerList = vector<Player>; // vector of players
-PlayerList player_list; // Global variable to store all the players
+using PlayerMap = map<string, PlayerList>; // map of players by position
+PlayerMap players_map; // Global variable to store all the players
 
 
 struct Query
@@ -57,25 +59,23 @@ private:
     map<string, PlayerList> players;
     int cost;
     int points;
-    string last_pos_added; // last position added to the solution
 
 public:
 
     // Default constructor
-    Solution() : cost(0), points(0), last_pos_added("") {
+    Solution() : cost(0), points(0) {
         for (auto pos : positions) {
             players[pos] = PlayerList();
         }
     }
 
     // Constructor
-    Solution(map<string, PlayerList> players, int cost, int points, string last_pos_added) 
-        : players(players), cost(cost), points(points), last_pos_added(last_pos_added) {}
+    Solution(map<string, PlayerList> players, int cost, int points) 
+        : players(players), cost(cost), points(points) {}
 
 
     void add_player(Player& player) {
         players[player.pos].push_back(player);
-        last_pos_added = player.pos;
         
         cost += player.price;
         points += player.points;
@@ -115,7 +115,14 @@ public:
         return size;
     }
 
-    
+    string get_pos_to_add() {
+        for (auto pos : positions) {
+            if (players[pos].size() < query.max_num_players[pos]) return pos;
+        }
+        
+        assert(false); // this should never happen since we check that the solution is not complete before calling this function
+    }
+
     // Writes the solution in the output file
     void write() { 
         ofstream output(output_filename);
@@ -179,14 +186,14 @@ Query read_query(const string& input_query) {
 
 
 /*
- * Reads the players database in data_base.txt and returns a vector of all the players (name, position, price and points)
+ * Reads the players database in data_base.txt and returns a map of all the players separated by position
+ * and sorted by a heuristic determining the best players to be considered first.
  */
-PlayerList read_players_list()
+PlayerMap read_players_map()
 {
     string databaseFile = "data_base.txt";
     ifstream in(databaseFile);
 
-    PlayerList player_list(0);
     while (not in.eof()) {
         string name, position, club;
         int points, price;
@@ -203,39 +210,53 @@ PlayerList read_players_list()
         getline(in,aux2);
         
         if (price > query.max_price_per_player) continue; // filter out the players with higher price than the maximum
-        if (points == 0) continue; // we don't store players that have 0 points, except from the last ones
+        if (points == 0 and club != "FakeTeam") continue; // we don't store players that have 0 points, except from the last ones
 
         Player player = {name, position, price, points};
-        player_list.push_back(player);
+        players_map[player.pos].push_back(player);
     }
     in.close();
+    
+    for (auto pos : positions) {
+        sort(players_map[pos].begin(), players_map[pos].end(), [](const Player& p1, const Player& p2) {
+            return pow(p1.points, 2.5) / p1.price > pow(p2.points, 2.5) / p2.price; // sort the players by a heuristic 
+        });
+    }
 
-  return player_list;
+  return players_map;
 }
 
 /*
  * Recursive function that obtains the best solution using exhaustive search.
  * Modifies the global variable solution, and stores the best partial solution found there
+ * prev_pos is the position of the last player added to the solution
+ * last_index is the index in players_map[prev_pos] of the last player added
  */
-void exhaustive_search(Solution& solution, int k = 0) {
+void exhaustive_search(Solution& solution, string prev_pos = "", uint last_index = 0) {
     
-    if (solution.get_size() > 11) return;
-
-    if (solution.get_cost() > query.max_cost) return; // this solution will have a higher cost than the maximum
-
     // candidate solution is better than solution
     if (solution.get_points() > best_solution.get_points()) {
         best_solution = solution;
         best_solution.write();
     }
+
+    // if the solution is complete, return
+    if (solution.get_size() == 11) return; 
+
+    // this solution will have a higher cost than the maximum
+    if (solution.get_cost() > query.max_cost) return;
+
+    // search for the next position needed to complete the solution
+    string pos = solution.get_pos_to_add();
+    if (prev_pos != pos) last_index = 0;
     
     // iterate over all possible players from the last player you have added to the solution (to avoid repeated partial solutions)
-    for (uint i = k; i < player_list.size(); i++) {
-        Player player = player_list[i];
+    for (uint i = last_index; i < players_map[pos].size(); i++) {
+        Player player = players_map[pos][i];
         
         if (solution.can_be_added(player)) {
             solution.add_player(player);
-            exhaustive_search(solution, i+1);
+            exhaustive_search(solution, pos, i+1);
             solution.pop_last_player(player.pos);
         }
     }
@@ -246,11 +267,6 @@ void exhaustive_search(Solution& solution, int k = 0) {
  * Modifies the global variable solution, and stores the best partial solution found there
  */
 void exhaustive_search() {
-    // sort the player list using a heuristic to obtain better solutions faster
-    sort(player_list.begin(), player_list.end(), [](const Player& p1, const Player& p2) {
-        return pow(p1.points, 2.5) / p1.price > pow(p2.points, 2.5) / p2.price;; 
-    });
-
     Solution initial_solution;
     exhaustive_search(initial_solution);
 }
@@ -269,7 +285,7 @@ int main(int argc, char *argv[]) {
     output_filename = argv[3]; // output file
 
     query = read_query(input_query); // llegim la consulta    
-    player_list = read_players_list(); // store all the players' info
+    players_map = read_players_map(); // store all the players' info
     
     exhaustive_search(); // stores the best solution in the global variable solution
 }

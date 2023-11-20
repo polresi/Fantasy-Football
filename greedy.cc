@@ -1,21 +1,19 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <map>
-#include <sstream>
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cmath>
-#include <cassert>
-
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 using namespace std;
 
 
 // Global variables
 const vector<string> positions = {"por", "def", "mig", "dav"}; // all the possible positions
-map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}};
+const map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}};
 
 string output_filename;
 chrono::time_point <chrono::high_resolution_clock> start;
@@ -58,36 +56,20 @@ private:
     map<string, PlayerList> players;
     int cost;
     int points;
-    string last_pos_added; // last position added to the solution
 
 public:
 
-    // Default constructor
-    Solution() : cost(0), points(0), last_pos_added("") {
+    Solution() : cost(0), points(0) {
         for (auto pos : positions) {
             players[pos] = PlayerList();
         }
     }
 
-    // Constructor
-    Solution(map<string, PlayerList> players, int cost, int points, string last_pos_added) 
-        : players(players), cost(cost), points(points), last_pos_added(last_pos_added) {}
-
-
-    void add_player(Player& player) {
+    void add_player(const Player& player) {
         players[player.pos].push_back(player);
-        last_pos_added = player.pos;
         
         cost += player.price;
         points += player.points;
-    }
-    
-    void pop_last_player(string pos) {
-        Player player = players[pos].back();
-        players[pos].pop_back();
-
-        cost -= player.price;
-        points -= player.points;
     }
 
     bool can_be_added(const Player& player) {
@@ -100,16 +82,8 @@ public:
         return true;
     }
 
-    int get_cost() const {
-        return cost;
-    }
-    
-    int get_points() const { // returns the number of points of the solution
-        return points;
-    }
-
-    uint get_size() { // returns the number of players in the solution
-        int size = 0;
+    uint get_size() {
+        uint size = 0;
         for (auto pos : positions) {
             size += players[pos].size();
         }
@@ -119,7 +93,7 @@ public:
     /*
      * Obtains the best player that can be added to the solution, and adds it to the solution.
      * It uses a heuristic that depends on the max_cost of the query
-     * Returns false if no player can be added.
+     * @returns false if no player can be added, true otherwise.
      */
     bool add_best_player() {
         player_list.erase(remove_if(player_list.begin(), player_list.end(), [this](Player p){
@@ -129,13 +103,14 @@ public:
         if (player_list.empty()) return false;
 
         // alpha is a parameter that depends on the maximum cost of the team of medium test and query 
-        const double alpha = 1.5 * pow(query.max_cost / 75e6, 2);
+        const double alpha = 2.5 * pow(query.max_cost / 1e8, 2);
         
         Player best_player;
+        
         if (get_size() < 10) { // we're not adding the last player
             best_player = *max_element(player_list.begin(), player_list.end(), [alpha](const Player& p1, const Player& p2) {
                 return pow(p1.points, alpha + 1) / p1.price < pow(p2.points, alpha + 1) / p2.price; // sort by points^alpha * density,
-            });                                                                                 // where density = points/price
+            });                                                                                     // where density = points/price
         } else { // we're adding the last player
             best_player = *max_element(player_list.begin(), player_list.end(), [alpha](const Player& p1, const Player& p2) {
                 return p1.points < p2.points; // get the player with most points
@@ -157,7 +132,7 @@ public:
         output << duration/1000.0 << endl;
 
         for (auto pos : positions) {
-            output << pos_to_CAPS[pos] << ": ";
+            output << pos_to_CAPS.at(pos) << ": ";
             write_players(pos, output);
         }
         
@@ -234,7 +209,7 @@ PlayerList read_players_list()
         getline(in,aux2);
         
         if (price > query.max_price_per_player) continue; // filter out the players with higher price than the maximum
-        if (points == 0) continue; // we don't store players that have 0 points
+        if (points == 0) continue; // we don't store players that have 0 points (neither real player nor fake ones)
 
         Player player = {name, position, price, points};
         player_list.push_back(player);
@@ -244,22 +219,15 @@ PlayerList read_players_list()
 }
 
 
-void greedy(Solution solution) {
-    if (solution.add_best_player()){ // modifies solution, returns false when no player can be added
-        greedy(solution);
-    } else {
-        solution.write();
-    }
-}
-
-
 /*
  * Function that obtains a good solution using a greedy algorithm.
- * It sorts the players by density (points/price) and adds them to the solution if they are valid.
+ * For each player to be added, it get the best player according to a heuristic.
  */
 void greedy() {
     Solution solution;
-    greedy(solution);    
+    while(solution.add_best_player())
+        ;
+    solution.write();
 }
 
 
@@ -271,8 +239,8 @@ int main(int argc, char *argv[]) {
     
     start = chrono::high_resolution_clock::now(); // start the timer
 
-    string input_database = argv[1]; // players' database
-    string input_query = argv[2]; // query input file
+    const string input_database = argv[1]; // players' database
+    const string input_query = argv[2]; // query input file
     output_filename = argv[3]; // output file
 
     query = read_query(input_query); // llegim la consulta    

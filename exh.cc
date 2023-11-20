@@ -1,21 +1,19 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <map>
-#include <sstream>
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cmath>
-#include <cassert>
-
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 using namespace std;
 
 
 // Global variables
 const vector<string> positions = {"por", "def", "mig", "dav"}; // all the possible positions
-map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}};
+const map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}};
 
 string output_filename;
 chrono::time_point <chrono::high_resolution_clock> start;
@@ -62,19 +60,13 @@ private:
 
 public:
 
-    // Default constructor
     Solution() : cost(0), points(0) {
         for (auto pos : positions) {
             players[pos] = PlayerList();
         }
     }
 
-    // Constructor
-    Solution(map<string, PlayerList> players, int cost, int points) 
-        : players(players), cost(cost), points(points) {}
-
-
-    void add_player(Player& player) {
+    void add_player(const Player& player) {
         players[player.pos].push_back(player);
         
         cost += player.price;
@@ -89,7 +81,7 @@ public:
         points -= player.points;
     }
 
-    bool can_be_added(Player& player) {
+    bool can_be_added(const Player& player) {
         if (players[player.pos].size() + 1 > query.max_num_players[player.pos]) return false;
         if (cost + player.price > query.max_cost) return false;
 
@@ -103,18 +95,19 @@ public:
         return cost;
     }
     
-    int get_points() const { // returns the number of points of the solution
+    int get_points() const {
         return points;
     }
 
-    uint get_size() { // returns the number of players in the solution
-        int size = 0;
+    uint get_size() {
+        uint size = 0;
         for (auto pos : positions) {
             size += players[pos].size();
         }
         return size;
     }
 
+    // returns the next position to be added to the solution, using the order: por, def, mig, dav
     string get_pos_to_add() {
         for (auto pos : positions) {
             if (players[pos].size() < query.max_num_players[pos]) return pos;
@@ -133,7 +126,7 @@ public:
         output << duration/1000.0 << endl;
 
         for (auto pos : positions) {
-            output << pos_to_CAPS[pos] << ": ";
+            output << pos_to_CAPS.at(pos) << ": ";
             write_players(pos, output);
         }
 
@@ -144,7 +137,7 @@ public:
 
 private:
 
-    // Writes the players of a given position in the output files
+    // Writes the players of a given position in the output file
     void write_players(string pos, ofstream& output) {
         PlayerList all_players = players[pos];
         // add fake players to complete the team
@@ -216,10 +209,11 @@ PlayerMap read_players_map()
         players_map[player.pos].push_back(player);
     }
     in.close();
-    
+
+    // sort each of the lists of players by a heuristic determining the best players to be considered first
     for (auto pos : positions) {
         sort(players_map[pos].begin(), players_map[pos].end(), [](const Player& p1, const Player& p2) {
-            return pow(p1.points, 2.5) / p1.price > pow(p2.points, 2.5) / p2.price; // sort the players by a heuristic 
+            return pow(p1.points, 3) / p1.price > pow(p2.points, 3) / p2.price; 
         });
     }
 
@@ -229,8 +223,8 @@ PlayerMap read_players_map()
 /*
  * Recursive function that obtains the best solution using exhaustive search.
  * Modifies the global variable solution, and stores the best partial solution found there
- * prev_pos is the position of the last player added to the solution
- * last_index is the index in players_map[prev_pos] of the last player added
+ * @param prev_pos the position of the last player added to the solution
+ * @param last_index the index in players_map[prev_pos] of the last player added
  */
 void exhaustive_search(Solution& solution, string prev_pos = "", uint last_index = 0) {
     
@@ -280,8 +274,8 @@ int main(int argc, char *argv[]) {
     
     start = chrono::high_resolution_clock::now(); // start the timer
 
-    string input_database = argv[1]; // players' database
-    string input_query = argv[2]; // query input file
+    const string input_database = argv[1]; // players' database
+    const string input_query = argv[2]; // query input file
     output_filename = argv[3]; // output file
 
     query = read_query(input_query); // llegim la consulta    

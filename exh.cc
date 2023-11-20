@@ -6,6 +6,7 @@
 #include <sstream>
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 
 
 using namespace std;
@@ -245,6 +246,11 @@ void exhaustive_search(Solution& solution, int k = 0) {
  * Modifies the global variable solution, and stores the best partial solution found there
  */
 void exhaustive_search() {
+    // sort the player list using a heuristic to obtain better solutions faster
+    sort(player_list.begin(), player_list.end(), [](const Player& p1, const Player& p2) {
+        return pow(p1.points, 2.5) / p1.price > pow(p2.points, 2.5) / p2.price;; 
+    });
+
     Solution initial_solution;
     exhaustive_search(initial_solution);
 }

@@ -133,12 +133,12 @@ public:
         
         Player best_player;
         if (get_size() < 10) { // we're not adding the last player
-            best_player = *max_element(player_list.begin(), player_list.end(), [alpha](const Player& a, const Player& b) {
-                return pow(a.points, alpha + 1) / a.price < pow(b.points, alpha + 1) / b.price; // sort by points^alpha * density,
+            best_player = *max_element(player_list.begin(), player_list.end(), [alpha](const Player& p1, const Player& p2) {
+                return pow(p1.points, alpha + 1) / p1.price < pow(p2.points, alpha + 1) / p2.price; // sort by points^alpha * density,
             });                                                                                 // where density = points/price
         } else { // we're adding the last player
-            best_player = *max_element(player_list.begin(), player_list.end(), [alpha](const Player& a, const Player& b) {
-                return a.points < b.points; // get the player with most points
+            best_player = *max_element(player_list.begin(), player_list.end(), [alpha](const Player& p1, const Player& p2) {
+                return p1.points < p2.points; // get the player with most points
             });
         }
 

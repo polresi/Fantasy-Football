@@ -131,7 +131,7 @@ public:
         }
 
         output << "Punts: " << points << endl;
-        output << "Preu: " << cost;
+        output << "Preu: " << cost << endl;
         output.close();
     }
 
@@ -139,12 +139,8 @@ private:
 
     // Writes the players of a given position in the output file
     void write_players(string pos, ofstream& output) {
-        PlayerList all_players = players[pos];
-        // add fake players to complete the team
-        PlayerList fake_players = get_fake_players(pos);
-        all_players.insert(all_players.end(), fake_players.begin(), fake_players.end());
         bool first = true;
-        for (Player p : all_players) {
+        for (Player p : players[pos]) {
             if (first) {
                 first = false;
                 output << p.name;
@@ -153,16 +149,6 @@ private:
             }
         }
         output << endl;
-    }
-
-    PlayerList get_fake_players(string pos) {
-        PlayerList p_list;
-        uint num_players = query.max_num_players[pos] - players[pos].size();
-        for (uint i = 0; i < num_players; i++) {
-            Player player = {"Fake_"+pos+char('1'+i), pos, 0, 0};
-            p_list.push_back(player);
-        }
-        return p_list;
     }
 
 };
@@ -228,14 +214,14 @@ PlayerMap read_players_map()
  */
 void exhaustive_search(Solution& solution, string prev_pos = "", uint last_index = 0) {
     
-    // candidate solution is better than solution
-    if (solution.get_points() > best_solution.get_points()) {
-        best_solution = solution;
-        best_solution.write();
+    if (solution.get_size() == 11) {
+        
+        if (solution.get_points() > best_solution.get_points()) {
+            best_solution = solution;
+            best_solution.write();
+        }
+        return;
     }
-
-    // if the solution is complete, return
-    if (solution.get_size() == 11) return; 
 
     // this solution will have a higher cost than the maximum
     if (solution.get_cost() > query.max_cost) return;

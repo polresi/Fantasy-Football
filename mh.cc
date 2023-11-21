@@ -155,7 +155,7 @@ public:
         }
         
         output << "Punts: " << points << endl;
-        output << "Preu: " << cost;
+        output << "Preu: " << cost << endl;
         output.close();
     }
 

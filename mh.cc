@@ -7,10 +7,9 @@
 #include <algorithm>
 #include <chrono>
 #include <random>
-
+#include <cassert>
 
 using namespace std;
-
 
 // Global variables
 const vector<string> positions = {"por", "def", "mig", "dav"}; // all the possible positions
@@ -18,6 +17,10 @@ map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, 
 
 string output_filename;
 chrono::time_point <chrono::high_resolution_clock> start;
+
+const long unsigned int num_selected = 100; // parameter: number of solutions selected in each iteration
+const int num_combined = 50; // parameter: number of solutions combined in each iteration
+const double mutation_rate = 0.1;
 
 
 struct Player
@@ -35,7 +38,8 @@ struct Player
 };
 
 using PlayerList = vector<Player>; // vector of players
-PlayerList player_list; // Global variable to store all the players
+using PlayerMap = map<string, PlayerList>; // map of players by position
+PlayerMap players_map; // Global variable to store all the players
 
 
 struct Query
@@ -57,12 +61,11 @@ private:
     map<string, PlayerList> players;
     int cost;
     int points;
-    string last_pos_added; // last position added to the solution
 
 public:
 
     // Default constructor
-    Solution() : cost(0), points(0), last_pos_added("") {
+    Solution() : cost(0), points(0){
         for (auto pos : positions) {
             players[pos] = PlayerList();
         }
@@ -70,12 +73,11 @@ public:
 
     // Constructor
     Solution(map<string, PlayerList> players, int cost, int points, string last_pos_added) 
-        : players(players), cost(cost), points(points), last_pos_added(last_pos_added) {}
+        : players(players), cost(cost), points(points) {}
 
 
-    void add_player(Player& player) {
+    void add_player(const Player& player) {
         players[player.pos].push_back(player);
-        last_pos_added = player.pos;
         
         cost += player.price;
         points += player.points;
@@ -89,7 +91,7 @@ public:
         points -= player.points;
     }
 
-    bool can_be_added(Player& player) {
+    bool can_be_added(const Player& player) {
         if (players[player.pos].size() + 1 > query.max_num_players[player.pos]) return false;
         if (cost + player.price > query.max_cost) return false;
 
@@ -115,23 +117,24 @@ public:
         return size;
     }
 
-    bool is_valid() {
-        for (auto pos : positions) {
-            if (players[pos].size() > query.max_num_players[pos]) {
-                return false;
-            }
-        }
-        // check that there are no repeated players        
-        for (uint i = 0; i < players[last_pos_added].size() - 1; i++) {
-            if (players[last_pos_added][i] == players[last_pos_added].back()) {
-                return false;
+    bool is_valid() const {
+        
+        if (cost > query.max_cost) return false;
+
+        // check that there are no repeated players
+        for (auto pos : positions) {        
+            for (uint i = 0; i < players.at(pos).size() - 1; i++) {
+                for (uint j = i+1; j < players.at(pos).size(); j++) {
+                    if (players.at(pos)[i] == players.at(pos)[j]) return false;
+                }
             }
         }
         return true;
     }
 
-
     void remove_player(const Player& p) {
+        cost -= p.price;
+        points -= p.points;
         players[p.pos].erase(remove(players[p.pos].begin(), players[p.pos].end(), p), players[p.pos].end());
     }
 
@@ -139,12 +142,16 @@ public:
         return players[pos];
     }
 
+    PlayerList at(string pos) const {
+        return players.at(pos);
+    }
+
     
     // Writes the solution in the output file
     void write() { 
         ofstream output(output_filename);
         auto end = chrono::high_resolution_clock::now();
-        auto duration = chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
         output << fixed;
         output.precision(1);
         output << duration/1000.0 << endl;
@@ -163,12 +170,8 @@ private:
 
     // Writes the players of a given position in the output files
     void write_players(string pos, ofstream& output) {
-        PlayerList all_players = players[pos];
-        // add fake players to complete the team
-        PlayerList fake_players = get_fake_players(pos);
-        all_players.insert(all_players.end(), fake_players.begin(), fake_players.end());
         bool first = true;
-        for (Player p : all_players) {
+        for (Player p : players[pos]) {
             if (first) {
                 first = false;
                 output << p.name;
@@ -177,16 +180,6 @@ private:
             }
         }
         output << endl;
-    }
-
-    PlayerList get_fake_players(string pos) {
-        PlayerList p_list;
-        uint num_players = query.max_num_players[pos] - players[pos].size();
-        for (uint i = 0; i < num_players; i++) {
-            Player player = {"Fake_"+pos+char('1'+i), pos, 0, 0};
-            p_list.push_back(player);
-        }
-        return p_list;
     }
 
 };
@@ -203,15 +196,11 @@ Query read_query(const string& input_query) {
 }
 
 
-/*
- * Reads the players database in data_base.txt and returns a vector of all the players (name, position, price and points)
- */
-PlayerList read_players_list()
+PlayerMap read_players_map()
 {
     string databaseFile = "data_base.txt";
     ifstream in(databaseFile);
 
-    PlayerList player_list(0);
     while (not in.eof()) {
         string name, position, club;
         int points, price;
@@ -228,126 +217,126 @@ PlayerList read_players_list()
         getline(in,aux2);
         
         if (price > query.max_price_per_player) continue; // filter out the players with higher price than the maximum
-        if (points == 0) continue; // we don't store players that have 0 points, except from the last ones
+        if (points == 0 and club != "FakeTeam") continue; // we don't store players that have 0 points, except from the last ones
 
         Player player = {name, position, price, points};
-        player_list.push_back(player);
+        players_map[player.pos].push_back(player);
     }
     in.close();
 
-  return player_list;
+    // sort each of the lists of players by a heuristic determining the best players to be considered first
+    for (auto pos : positions) {
+        sort(players_map[pos].begin(), players_map[pos].end(), [](const Player& p1, const Player& p2) {
+            return pow(p1.points, 3) / p1.price > pow(p2.points, 3) / p2.price; 
+        });
+    }
+
+    return players_map;
 }
 
 
-int fitness(Solution solution){ // returns the fitness of a solution
+int fitness(const Solution& solution){ // returns the fitness of a solution
     if (not solution.is_valid()) return 0; // penalize the solutions that exceed the maximum cost
     return solution.get_points();
 }
 
-pair<Solution, Solution> select_parents(Population population) {
-    // Select two random solutions from the population
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<int> dist(0, population.size() - 1);
+
+pair<Solution, Solution> select_parents(const Population& population) {
     
-    int index1 = dist(gen);
-    int index2 = dist(gen);
+    int index1 = rand() % population.size();
+    int index2 = rand() % population.size();
 
     Solution solution1 = population[index1];
     Solution solution2 = population[index2];
+
     return {solution1, solution2};
 }
 
-Population recombine(Solution solution1, Solution solution2) {
-    Population combined_solutions;
-    Solution new_solution = solution1;
-    
-    for (auto pos : positions){
 
-        for (uint i = 0; i < new_solution[pos].size(); ++i) {
-            if (rand() % 2 == 0) {
-                new_solution.remove_player(new_solution[pos][i]); // solution[pos] == solution.player[pos]
-                new_solution.add_player(solution2[pos][i]);
-            }
-        }
-        combined_solutions.push_back(new_solution);
-    }
-    return combined_solutions;
-}
-
-void mutate(Solution solution) {
-    int mutation_rate = 0.1 * solution.get_size(); 
+void mutate(Solution& solution) {
     for (auto pos : positions) {
         for (Player p : solution[pos]) {
-            if ((rand() / static_cast<double>(RAND_MAX)) < mutation_rate){
+            if ((rand() / static_cast<double>(RAND_MAX)) < mutation_rate) {
                 solution.remove_player(p);
+                solution.add_player(players_map[pos][rand() % players_map[pos].size()]); // try not uniform distr
             }
         }
     }
     return;
 }
 
-Population recombine_and_mutate(Solution solution1, Solution solution2) {
-    Population combined_solutions = recombine(solution1, solution2);
-    for (Solution solution : combined_solutions) {
-        mutate(solution);
+
+Population recombine_and_mutate(const Solution& parent1, const Solution& parent2) {
+    Population combined_solutions;
+    
+    for (int i = 0; i < num_combined; ++i) {
+
+        Solution new_solution = parent1;
+        for (auto pos : positions){
+            for (int j = 0; j < new_solution[pos].size(); ++j) {
+                if (rand() % 2 == 0) {
+                    new_solution.remove_player(new_solution[pos][j]); // solution[pos] == solution.player[pos]
+                    new_solution.add_player(parent2.at(pos)[j]);
+                }
+            }
+        }
+        mutate(new_solution);
+        combined_solutions.push_back(new_solution);
     }
+
     return combined_solutions;
 }
 
-Population select_individuals(Population solutions, ulong num_selected) {
+Population select_individuals(Population solutions) {
     Population selected_solutions;
 
     sort (solutions.begin(), solutions.end(), [](const Solution& s1, const Solution& s2) {
         return fitness(s1) > fitness(s2);
     });
 
-    for (int i = 0; i < min(num_selected, solutions.size()); i++) {
-        selected_solutions.push_back(solutions[i]);
-    }
-    return selected_solutions;
-    // while (num_selected < 2) {
-    //     int index = rand() % solutions.size();
-    //     Solution solution = solutions[index];
-    //     if (rand() / static_cast<double>(RAND_MAX) < fitness(solution)) {
-    //         selected_solutions.push_back(solution);
-    //         num_selected++;
-    //     }
+    return Population(solutions.begin(), solutions.begin() + min(num_selected, solutions.size()));
+
+    // for (long unsigned int i = 0; i < min(num_selected, solutions.size()); i++) {
+    //     selected_solutions.push_back(solutions[i]);
     // }
     // return selected_solutions;
 }
 
 Population generate_initial_population() { // Use greedy algorithm to generate an initial solution
     Solution solution;
-    const double alpha = 1.6 * pow(query.max_cost / 75000000, 2); // the greedy algorithm works best with this parameter
-
-    sort(player_list.begin(), player_list.end(), [alpha](const Player& p1, const Player& p2) {
-        return pow(p1.points, alpha + 1) / p1.price > pow(p2.points, alpha + 1) / p2.price;
-    });
-
-    for (Player p : player_list) {
-        if (solution.can_be_added(p)) {
-            solution.add_player(p);
+    for (auto pos : positions) {
+        for (Player p : players_map[pos]) {
+            if (solution.can_be_added(p)) solution.add_player(p);
         }
     }
     return {solution};
 }
+/*
+int no_improvement_count = 0;
+Solution prev_best;
+
+bool not_finished(){
+    int threshold = 100; // Set your threshold
+    return no_improvement_count < threshold;
+}
+*/
 
 void metaheuristica(int num_selected) {
 
     Population population = generate_initial_population();
+    
     uint gen = 0;
     while (true){
-        cout << gen++ << endl;
+        if (++gen%500 == 0) cout << gen << endl;
         auto [parent1, parent2] = select_parents(population);
         Population population = recombine_and_mutate(parent1, parent2);
-        population = select_individuals(population, num_selected);
+        population = select_individuals(population);
         
-        for (auto solution : population) {
-            if (solution.get_points() > best_solution.get_points()) {
-                best_solution = solution;
-                best_solution.write();
-            }
+        Solution candidate = population[0];
+        if (candidate.get_points() > best_solution.get_points() and candidate.is_valid()) {
+            best_solution = candidate;
+            best_solution.write();
+            cout << "New best solution found: " << best_solution.get_points() << ", " << best_solution.get_cost() <<  endl;
         }
     }
 }
@@ -366,8 +355,7 @@ int main(int argc, char *argv[]) {
     output_filename = argv[3]; // output file
 
     query = read_query(input_query); // llegim la consulta    
-    player_list = read_players_list(); // store all the players' info
-
-    ulong num_selected = 100; // parameter: number of solutions selected in each iteration
+    players_map = read_players_map(); // store all the players' info
+    
     metaheuristica(num_selected); 
 }

@@ -135,7 +135,8 @@ public:
     void remove_player(const Player& p) {
         cost -= p.price;
         points -= p.points;
-        players[p.pos].erase(remove(players[p.pos].begin(), players[p.pos].end(), p), players[p.pos].end());
+        auto it = find(players[p.pos].begin(), players[p.pos].end(), p);
+        players[p.pos].erase(it);
     }
 
     PlayerList operator[](string pos) {
@@ -273,13 +274,14 @@ Population recombine_and_mutate(const Solution& parent1, const Solution& parent2
 
         Solution new_solution = parent1;
         for (auto pos : positions){
-            for (int j = 0; j < new_solution[pos].size(); ++j) {
+            for (unsigned int j = 0; j < new_solution[pos].size(); ++j) {
                 if (rand() % 2 == 0) {
                     new_solution.remove_player(new_solution[pos][j]); // solution[pos] == solution.player[pos]
                     new_solution.add_player(parent2.at(pos)[j]);
                 }
             }
         }
+        // assert(new_solution.get_size() == 11);
         mutate(new_solution);
         combined_solutions.push_back(new_solution);
     }
@@ -327,7 +329,7 @@ void metaheuristica(int num_selected) {
     
     uint gen = 0;
     while (true){
-        if (++gen%500 == 0) cout << gen << endl;
+        if (++gen%1000 == 0) cout << "generation: " << gen << endl;
         auto [parent1, parent2] = select_parents(population);
         Population population = recombine_and_mutate(parent1, parent2);
         population = select_individuals(population);

@@ -1,37 +1,23 @@
 import subprocess
+from run_file import get_points
 
 
-def run_file(executable_path, arguments):
+def compile_file(alg):
     try:
-        subprocess.run(['./' + executable_path] + arguments, check=True)
-        res = subprocess.run(['./checker'] + arguments, check=True, text=True, capture_output=True).stdout
-        assert res == 'OK\n'
+        subprocess.run(["g++", alg+'.cc', "-o", alg, "-O3", "-Wall"], check=True)
     
     except subprocess.CalledProcessError as e:
-        print(f"Error running the executable: {e}")
+        print(f"Error compiling the file: {e}")
+    
 
-
-def get_avg(diff: str) -> float:
-    sum = 0.0
-    for i in range(1, 8):
-        input_file = f'public_benchs/{diff}-{i}.txt'
-        run_file('greedy', ['data_base.txt', input_file, 'output.txt'])
-
-        with open('output.txt', 'r') as file:
-            content = file.read()
-            # print(content)
-            points_line = content.split('\n')[-2]
-            points = int(points_line.split()[-1])
-
-        sum += points
-
-    return sum / 7
-
-        
 def main():
-    subprocess.run(["g++", "greedy.cc", "-O3", "-o", "greedy", "-Wall"])
+    alg = 'greedy'
+    compile_file(alg)
+
     for diff in ('easy', 'med', 'hard'):
-        print(f'{diff} : {get_avg(diff)}')
+        avg = int( sum( get_points(alg, diff, str(i)) for i in range(1, 8) ) / 7 )
+        # formatted_avg = f'{avg:,}'
+        print(f'{diff: >4} : {avg: >11,}')
 
 if __name__ == '__main__':
     main()

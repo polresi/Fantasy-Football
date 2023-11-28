@@ -36,12 +36,12 @@ def compile_file(alg):
 def main():
     alg, diff, num = sys.argv[1:4]
 
-    if len(sys.argv) < 4 or sys.argv[4] != 'nc': # nc = no compilation
+    if len(sys.argv) <= 4 or sys.argv[4] != 'nc': # nc = no compilation
         compile_file(alg)
         
     points = get_points(alg, diff, num)
     print(f'Points: {points}')
-
+    
 
 if __name__ == '__main__':
     main()

@@ -228,7 +228,7 @@ PlayerMap read_players_map()
     // sort each of the lists of players by a heuristic determining the best players to be considered first
     for (auto pos : positions) {
         sort(players_map[pos].begin(), players_map[pos].end(), [](const Player& p1, const Player& p2) {
-            return pow(p1.points, 3) / p1.price > pow(p2.points, 3) / p2.price; 
+            return pow(p1.points, 1.8) / p1.price > pow(p2.points, 1.8) / p2.price; 
         });
     }
 

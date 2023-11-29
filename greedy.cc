@@ -103,7 +103,7 @@ public:
         if (player_list.empty()) return false;
 
         // alpha is a parameter that depends on the maximum cost of the team of medium test and query 
-        const double alpha = pow(query.max_cost / 1e7, 0.3);
+        const double alpha = pow(query.max_cost / 1e7, 0.3); // sort by: points^alpha * density (density = points/price)
         
         Player best_player;
         

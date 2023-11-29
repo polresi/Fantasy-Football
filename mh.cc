@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <map>
+#include<map>
 #include <sstream>
 #include <algorithm>
 #include <chrono>
@@ -21,6 +21,7 @@ chrono::time_point <chrono::high_resolution_clock> start;
 const long unsigned int num_selected = 100; // parameter: number of solutions selected in each iteration
 const int num_combined = 50; // parameter: number of solutions combined in each iteration
 const double mutation_rate = 0.1;
+unsigned int no_improvement_count = 0;
 
 
 struct Player
@@ -33,6 +34,11 @@ struct Player
     bool operator==(const Player& other) const {
         // Compare the members that define equality for Player objects
         return name == other.name && pos == other.pos && price == other.price && points == other.points;
+    }
+
+    double get_value() const {
+        if (price == 0) return 0;
+        return pow(points, 3) / price;
     }
 
 };
@@ -149,7 +155,7 @@ public:
 
     
     // Writes the solution in the output file
-    void write() { 
+    void write() {
         ofstream output(output_filename);
         auto end = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
@@ -228,7 +234,7 @@ PlayerMap read_players_map()
     // sort each of the lists of players by a heuristic determining the best players to be considered first
     for (auto pos : positions) {
         sort(players_map[pos].begin(), players_map[pos].end(), [](const Player& p1, const Player& p2) {
-            return pow(p1.points, 2) / p1.price > pow(p2.points, 2) / p2.price; 
+            return pow(p1.points, 3) / p1.price > pow(p2.points, 3) / p2.price;
         });
     }
 
@@ -297,48 +303,54 @@ Population select_individuals(Population solutions) {
     });
 
     return Population(solutions.begin(), solutions.begin() + min(num_selected, solutions.size()));
-
-    // for (long unsigned int i = 0; i < min(num_selected, solutions.size()); i++) {
-    //     selected_solutions.push_back(solutions[i]);
-    // }
-    // return selected_solutions;
 }
 
 Population generate_initial_population() { // Use greedy algorithm to generate an initial solution
     Solution solution;
-    for (auto pos : positions) {
-        for (Player p : players_map[pos]) {
-            if (solution.can_be_added(p)) solution.add_player(p);
-        }
+
+    vector<PlayerList::iterator> iters = {players_map["por"].begin(), players_map["def"].begin(), 
+                                          players_map["mig"].begin(),players_map["dav"].begin()};
+
+    vector<double> best_values = {players_map["por"][0].get_value(), players_map["def"][0].get_value(),
+                                  players_map["mig"][0].get_value(), players_map["dav"][0].get_value()};
+
+    while (solution.get_size() < 11) {
+        int index = max_element(best_values.begin(), best_values.end()) - best_values.begin();
+        
+        if (solution.can_be_added(*(iters[index])))
+            solution.add_player(*(iters[index]));
+
+        iters[index]++;
+        
+        if (iters[index] == players_map[positions[index]].end())
+            best_values[index] = -1;
+        else
+            best_values[index] = (*iters[index]).get_value();
     }
+
     return {solution};
 }
-/*
-int no_improvement_count = 0;
-Solution prev_best;
 
-bool not_finished(){
-    int threshold = 100; // Set your threshold
-    return no_improvement_count < threshold;
-}
-*/
 
 void metaheuristica(int num_selected) {
 
     Population population = generate_initial_population();
-    
+    int no_improvement_count = 0;
     uint gen = 0;
-    while (true){
-        if (++gen%1000 == 0) cout << "generation: " << gen << endl;
+    while (no_improvement_count < 10000){
+        // if (++gen%1000 == 0) cout << "generation: " << gen << endl;
         auto [parent1, parent2] = select_parents(population);
         Population population = recombine_and_mutate(parent1, parent2);
         population = select_individuals(population);
         
+        no_improvement_count++;
         Solution candidate = population[0];
         if (candidate.get_points() > best_solution.get_points() and candidate.is_valid()) {
             best_solution = candidate;
+            
             best_solution.write();
-            cout << "New best solution found: " << best_solution.get_points() << ", " << best_solution.get_cost() <<  endl;
+            // cout << "New best solution found: " << best_solution.get_points() << ", " << best_solution.get_cost() <<  endl;
+            no_improvement_count = 0;
         }
     }
 }

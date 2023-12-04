@@ -35,8 +35,15 @@ public:
         return name == other.name and pos == other.pos and price == other.price and points == other.points;
     }
 
-    bool operator< (const Player& other) const {
-        return pow(points, alpha + 1) / price < pow(other.points, alpha + 1) / other.price;
+    bool operator> (const Player& other) const {
+        return get_value() > other.get_value();
+    }
+    
+private:
+    
+    double get_value() const {
+        if (price == 0) return 0;
+        return pow(points, alpha + 1) / price;
     }
 };
 
@@ -213,7 +220,7 @@ PlayerMap read_players_map()
 
     // sort each of the lists of players by a heuristic determining the best players to be considered first
     for (auto pos : positions) {
-        sort(players_map[pos].begin(), players_map[pos].end());
+        sort(players_map[pos].begin(), players_map[pos].end(), greater<Player>());
     }
 
   return players_map;

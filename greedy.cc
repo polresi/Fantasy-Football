@@ -37,8 +37,16 @@ public:
     }
 
     bool operator< (const Player& other) const {
-        return pow(points, alpha + 1) / price < pow(other.points, alpha + 1) / other.price;
+        return get_value() < other.get_value();
     }
+
+private:
+    
+    double get_value() const {
+        if (price == 0) return 0;
+        return pow(points, alpha + 1) / price;
+    }
+
 };
 
 using PlayerList = vector<Player>; // vector of players

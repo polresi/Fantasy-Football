@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include<map>
+#include <map>
 #include <sstream>
 #include <algorithm>
 #include <chrono>
@@ -24,24 +24,34 @@ const double mutation_rate = 0.1;
 unsigned int no_improvement_count = 0;
 
 
-struct Player
+class Player
 {
+public:
+    static inline double alpha;
     string name;
     string pos;
     int price;
     int points;
 
-    bool operator==(const Player& other) const {
-        // Compare the members that define equality for Player objects
-        return name == other.name && pos == other.pos && price == other.price && points == other.points;
+    Player () {}
+
+    Player(const string& name, const string& pos, int price, int points)
+        : name(name), pos(pos), price(price), points(points) {}
+
+    bool operator== (const Player& other) const {
+        return name == other.name and pos == other.pos and price == other.price and points == other.points;
+    }
+
+    bool operator> (const Player& other) const {
+        return get_value() > other.get_value();
     }
 
     double get_value() const {
         if (price == 0) return 0;
-        return pow(points, 3) / price;
+        return pow(points, alpha + 1) / price;
     }
-
 };
+
 
 using PlayerList = vector<Player>; // vector of players
 using PlayerMap = map<string, PlayerList>; // map of players by position
@@ -233,9 +243,7 @@ PlayerMap read_players_map()
 
     // sort each of the lists of players by a heuristic determining the best players to be considered first
     for (auto pos : positions) {
-        sort(players_map[pos].begin(), players_map[pos].end(), [](const Player& p1, const Player& p2) {
-            return pow(p1.points, 3) / p1.price > pow(p2.points, 3) / p2.price;
-        });
+        sort(players_map[pos].begin(), players_map[pos].end(), greater<Player>());
     }
 
     return players_map;
@@ -327,23 +335,21 @@ Population generate_initial_population() { // Use greedy algorithm to generate a
         else
             best_values[index] = (*iters[index]).get_value();
     }
-
+    cout << solution.get_points() << endl;
     return {solution};
 }
-
 
 void metaheuristica(int num_selected) {
 
     Population population = generate_initial_population();
     int no_improvement_count = 0;
-    uint gen = 0;
-    while (no_improvement_count < 10000){
+    // uint gen = 0;
+    while (no_improvement_count++ < 100000){
         // if (++gen%1000 == 0) cout << "generation: " << gen << endl;
         auto [parent1, parent2] = select_parents(population);
         Population population = recombine_and_mutate(parent1, parent2);
         population = select_individuals(population);
         
-        no_improvement_count++;
         Solution candidate = population[0];
         if (candidate.get_points() > best_solution.get_points() and candidate.is_valid()) {
             best_solution = candidate;
@@ -361,15 +367,17 @@ int main(int argc, char *argv[]) {
         cout << "Us incorrecte. S'han de proporcionar 3 arguments: data_base, query_file, output_file" << endl;
         return 1; 
     }
-    
+
     start = chrono::high_resolution_clock::now(); // start the timer
 
-    string input_database = argv[1]; // players' database
-    string input_query = argv[2]; // query input file
-    output_filename = argv[3]; // output file
+    string input_database = argv[1];
+    string input_query = argv[2];
+    output_filename = argv[3];
 
-    query = read_query(input_query); // llegim la consulta    
-    players_map = read_players_map(); // store all the players' info
+    query = read_query(input_query);
+    Player::alpha = pow(query.max_cost / 1e7, 0.3);
+
+    players_map = read_players_map();
     
     metaheuristica(num_selected); 
 }

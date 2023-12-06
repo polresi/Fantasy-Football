@@ -271,10 +271,36 @@ pair<Solution, Solution> select_parents(const Population& population) {
 void mutate(Solution& solution) {
     for (auto pos : positions) {
         for (Player p : solution[pos]) {
-            if ((rand() / static_cast<double>(RAND_MAX)) < mutation_rate) {
+            if ((rand() / double(RAND_MAX)) < mutation_rate) {
                 solution.remove_player(p);
                 solution.add_player(players_map[pos][rand() % players_map[pos].size()]); // try not uniform distr
             }
+        }
+    }
+    return;
+}
+
+void mutate2(Solution& solution){
+    
+    for (auto pos : positions){
+        for (Player p : solution[pos]) {
+
+            if ((rand() / double(RAND_MAX)) < mutation_rate){
+                solution.remove_player(p);
+                
+                size_t n = solution[pos].size();
+                uint random = rand() % (n*(n-1) / 2); // 0 .. n*(n-1)/2 - 1
+
+                for (uint i = 1; i <= n; ++i){
+                    if (random < i) {
+                        solution.add_player(players_map[pos][i-1]);
+                        break;
+                    } else {
+                        random -= i;
+                    }
+                }
+            }
+
         }
     }
     return;
@@ -335,7 +361,6 @@ Population generate_initial_population() { // Use greedy algorithm to generate a
         else
             best_values[index] = (*iters[index]).get_value();
     }
-    cout << solution.get_points() << endl;
     return {solution};
 }
 
@@ -343,9 +368,9 @@ void metaheuristica(int num_selected) {
 
     Population population = generate_initial_population();
     int no_improvement_count = 0;
-    // uint gen = 0;
+    uint gen = 0;
     while (no_improvement_count++ < 100000){
-        // if (++gen%1000 == 0) cout << "generation: " << gen << endl;
+        if (++gen%1 == 0) cout << "generation: " << gen << endl;
         auto [parent1, parent2] = select_parents(population);
         Population population = recombine_and_mutate(parent1, parent2);
         population = select_individuals(population);
@@ -355,7 +380,7 @@ void metaheuristica(int num_selected) {
             best_solution = candidate;
             
             best_solution.write();
-            // cout << "New best solution found: " << best_solution.get_points() << ", " << best_solution.get_cost() <<  endl;
+            cout << "New best solution found: " << best_solution.get_points() << ", " << best_solution.get_cost() <<  endl;
             no_improvement_count = 0;
         }
     }

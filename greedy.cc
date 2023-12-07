@@ -184,12 +184,11 @@ Query read_query(const string& query_file) {
 /*
  * Reads the players database in data_base.txt and returns a vector of all the players (name, position, price and points)
  */
-PlayerList read_players_list()
+void read_players_list()
 {
     string databaseFile = "data_base.txt";
     ifstream in(databaseFile);
 
-    PlayerList player_list(0);
     while (not in.eof()) {
         string name, position, club;
         int points, price;
@@ -211,8 +210,8 @@ PlayerList read_players_list()
         Player player = {name, position, price, points};
         player_list.push_back(player);
     }
+
     in.close();
-  return player_list;
 }
 
 
@@ -239,7 +238,7 @@ int main(int argc, char *argv[]) {
     query = read_query(query_file);
     Player::alpha = pow(query.max_cost / 1e7, 0.3); // heuristic parameter for the greedy algorithm
 
-    player_list = read_players_list();
+    read_players_list();
 
     greedy();
 }

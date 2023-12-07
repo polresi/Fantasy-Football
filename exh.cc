@@ -190,8 +190,9 @@ Query read_query(const string& query_file) {
  * Reads the players database in data_base.txt and returns a map of all the players separated by position
  * and sorted by a heuristic determining the best players to be considered first.
  */
-PlayerMap read_players_map()
+void read_players_map()
 {
+
     string databaseFile = "data_base.txt";
     ifstream in(databaseFile);
 
@@ -211,19 +212,43 @@ PlayerMap read_players_map()
         getline(in,aux2);
         
         if (price > query.max_price_per_player) continue; // filter out the players with higher price than the maximum
-        if (points == 0 and club != "FakeTeam") continue; // we don't store players that have 0 points, except from the last ones
-
-        Player player = {name, position, price, points};
+        if (points == 0) continue;
+        
+        Player player = {name, position, price, points};    
         players_map[player.pos].push_back(player);
     }
+
     in.close();
 
+    // remove players that are worse in points and price than other players in the same position given the maximum number of players in each position  
+    for (auto pos : positions) {
+        for (uint i = 0; i < players_map[pos].size(); i++) {
+            Player player = players_map[pos][i];
+
+            uint count = count_if(players_map[pos].begin(), players_map[pos].end(), [player](const Player& other) {
+                return other.price <= player.price and other.points >= player.points;
+            });
+            if (count > query.max_num_players[pos]) {
+                players_map[pos].erase(players_map[pos].begin() + i);
+                i--;
+            }
+
+        }
+    }
+    
     // sort each of the lists of players by a heuristic determining the best players to be considered first
     for (auto pos : positions) {
         sort(players_map[pos].begin(), players_map[pos].end(), greater<Player>());
     }
 
-  return players_map;
+    // add fake players to each position given the maximum number of players in each position
+    for (auto pos : positions) {
+        for (uint i = 1; i <= query.max_num_players[pos]; i++) {
+            Player fake_player = {"Fake_" + pos + to_string(i), pos, 0, 0};
+            players_map[pos].push_back(fake_player);
+        }
+    }
+
 }
 
 /*
@@ -281,7 +306,7 @@ int main(int argc, char *argv[]) {
     query = read_query(query_file);
     Player::alpha = pow(query.max_cost / 1e7, 0.3); // sets the static variable alpha of the class Player
 
-    players_map = read_players_map();
+    read_players_map();
     
     exhaustive_search(); // stores the best solution in the global variable solution
 }

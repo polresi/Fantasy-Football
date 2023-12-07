@@ -21,7 +21,7 @@ chrono::time_point <chrono::high_resolution_clock> start;
 const long unsigned int num_selected = 100; // parameter: number of solutions selected in each iteration
 const int num_combined = 50; // parameter: number of solutions combined in each iteration
 const double mutation_rate = 0.1;
-unsigned int no_improvement_count = 0;
+uint no_improvement_count = 0;
 
 
 class Player
@@ -273,38 +273,38 @@ void mutate(Solution& solution) {
         for (Player p : solution[pos]) {
             if ((rand() / double(RAND_MAX)) < mutation_rate) {
                 solution.remove_player(p);
-                solution.add_player(players_map[pos][rand() % players_map[pos].size()]); // try not uniform distr
+                solution.add_player(players_map[pos][rand() % players_map[pos].size()]);
             }
         }
     }
     return;
 }
 
-void mutate2(Solution& solution){
+// void mutate2(Solution& solution){
     
-    for (auto pos : positions){
-        for (Player p : solution[pos]) {
+//     for (auto pos : positions){
+//         for (Player p : solution[pos]) {
 
-            if ((rand() / double(RAND_MAX)) < mutation_rate){
-                solution.remove_player(p);
+//             if ((rand() / double(RAND_MAX)) < mutation_rate){
+//                 solution.remove_player(p);
                 
-                size_t n = solution[pos].size();
-                uint random = rand() % (n*(n-1) / 2); // 0 .. n*(n-1)/2 - 1
+//                 size_t n = solution[pos].size();
+//                 uint random = rand() % (n*(n-1) / 2); // 0 .. n*(n-1)/2 - 1
 
-                for (uint i = 1; i <= n; ++i){
-                    if (random < i) {
-                        solution.add_player(players_map[pos][i-1]);
-                        break;
-                    } else {
-                        random -= i;
-                    }
-                }
-            }
+//                 for (uint i = 1; i <= n; ++i){
+//                     if (random < i) {
+//                         solution.add_player(players_map[pos][i-1]);
+//                         break;
+//                     } else {
+//                         random -= i;
+//                     }
+//                 }
+//             }
 
-        }
-    }
-    return;
-}
+//         }
+//     }
+//     return;
+// }
 
 
 Population recombine_and_mutate(const Solution& parent1, const Solution& parent2) {
@@ -341,6 +341,7 @@ Population select_individuals(Population solutions) {
 
 Population generate_initial_population() { // Use greedy algorithm to generate an initial solution
     Solution solution;
+    Population initial_population;
 
     vector<PlayerList::iterator> iters = {players_map["por"].begin(), players_map["def"].begin(), 
                                           players_map["mig"].begin(),players_map["dav"].begin()};
@@ -361,7 +362,19 @@ Population generate_initial_population() { // Use greedy algorithm to generate a
         else
             best_values[index] = (*iters[index]).get_value();
     }
-    return {solution};
+    
+    initial_population.push_back(solution);
+    for (uint i = 0; i < num_selected - 1; ++i) {
+        Solution new_solution;
+        for (auto pos : positions) {
+            for (uint j = 0; j < query.max_num_players[pos]; j++) {
+                new_solution.add_player(players_map[pos][rand() % players_map[pos].size()]);
+            }
+        }
+        initial_population.push_back(new_solution);
+    }
+    return initial_population;
+
 }
 
 void metaheuristica(int num_selected) {
@@ -369,8 +382,8 @@ void metaheuristica(int num_selected) {
     Population population = generate_initial_population();
     int no_improvement_count = 0;
     uint gen = 0;
-    while (no_improvement_count++ < 100000){
-        if (++gen%1 == 0) cout << "generation: " << gen << endl;
+    while (no_improvement_count++ < 20000){
+        if (++gen%1000 == 0) cout << "generation: " << gen << endl;
         auto [parent1, parent2] = select_parents(population);
         Population population = recombine_and_mutate(parent1, parent2);
         population = select_individuals(population);

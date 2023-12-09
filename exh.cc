@@ -16,7 +16,7 @@ const vector<string> positions = {"por", "def", "mig", "dav"}; // List of all th
 const map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}}; // Map to convert the position to capital letters
 
 string output_file;
-chrono::time_point <chrono::high_resolution_clock> start_time;
+chrono::time_point<chrono::high_resolution_clock> start_time;
 
 
 class Player
@@ -50,11 +50,8 @@ private:
 
 struct Query
 {
-    int N1;
-    int N2;
-    int N3;
-    int max_cost;
-    int max_price_per_player;
+    uint N1, N2, N3;
+    int max_cost, max_price_per_player;
     map<string, uint> max_num_players = {{"por", 1}, {"def", N1}, {"mig", N2}, {"dav", N3}};
 };
 
@@ -70,8 +67,7 @@ class Solution
 {
 private:
     map<string, PlayerList> players;
-    int cost;
-    int points;
+    int cost, points;
 
 public:
 
@@ -118,7 +114,6 @@ public:
         for (auto pos : positions) {
             if (players.at(pos).size() < query.max_num_players[pos]) return pos;
         }
-        
         assert(false); // the solution is not complete before calling this function
     }
 
@@ -180,7 +175,8 @@ Solution best_solution; // global variable to store the best solution found so f
 
 Query read_query(const string& query_file) {
     ifstream file(query_file);
-    int N1, N2, N3, max_cost, max_price_per_player;
+    uint N1, N2, N3;
+    int max_cost, max_price_per_player;
     file >> N1 >> N2 >> N3 >> max_cost >> max_price_per_player;
     return {N1, N2, N3, max_cost, max_price_per_player};
 }
@@ -217,7 +213,6 @@ void read_players_map()
         Player player = {name, position, price, points};    
         players_map[player.pos].push_back(player);
     }
-
     in.close();
 
     // remove players that are worse in points and price than other players in the same position given the maximum number of players in each position  
@@ -297,7 +292,7 @@ void exhaustive_search() {
 
 int main(int argc, char *argv[]) {
 
-    start_time = chrono::high_resolution_clock::now(); // start the timer
+    start_time = chrono::high_resolution_clock::now();
 
     const string input_database = argv[1];
     const string query_file = argv[2];

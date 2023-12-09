@@ -55,11 +55,8 @@ PlayerList player_list; // Global variable to store all the players
 
 struct Query
 {
-    int N1;
-    int N2;
-    int N3;
-    int max_cost;
-    int max_price_per_player;
+    uint N1, N2, N3;
+    int max_cost, max_price_per_player;
     map<string, uint> max_num_players = {{"por", 1}, {"def", N1}, {"mig", N2}, {"dav", N3}};
 };
 
@@ -70,8 +67,7 @@ class Solution {
 
 private:
     map<string, PlayerList> players;
-    int cost;
-    int points;
+    int cost, points;
 
 public:
 
@@ -175,7 +171,8 @@ Solution best_solution; // global variable to store the best solution found so f
 
 Query read_query(const string& query_file) {
     ifstream file(query_file);
-    int N1, N2, N3, max_cost, max_price_per_player;
+    uint N1, N2, N3;
+    int max_cost, max_price_per_player;
     file >> N1 >> N2 >> N3 >> max_cost >> max_price_per_player;
     return {N1, N2, N3, max_cost, max_price_per_player};
 }

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <sstream>
 #include <algorithm>
 #include <chrono>
@@ -28,10 +29,8 @@ class Player
 {
 public:
     static inline double alpha;
-    string name;
-    string pos;
-    int price;
-    int points;
+    string name, pos;
+    int price, points;
 
     Player () {}
 
@@ -40,6 +39,10 @@ public:
 
     bool operator== (const Player& other) const {
         return name == other.name and pos == other.pos and price == other.price and points == other.points;
+    }
+
+    bool operator< (const Player& other) const {
+        return get_value() < other.get_value();
     }
 
     bool operator> (const Player& other) const {
@@ -60,11 +63,8 @@ PlayerMap players_map; // Global variable to store all the players
 
 struct Query
 {
-    int N1;
-    int N2;
-    int N3;
-    int max_cost;
-    int max_price_per_player;
+    uint N1, N2, N3;
+    int max_cost, max_price_per_player;
     map<string, uint> max_num_players = {{"por", 1}, {"def", N1}, {"mig", N2}, {"dav", N3}};
 };
 
@@ -75,8 +75,7 @@ class Solution {
 
 private:
     map<string, PlayerList> players;
-    int cost;
-    int points;
+    int cost, points;
 
 public:
 
@@ -125,8 +124,8 @@ public:
         return points;
     }
 
-    uint get_size() { // returns the number of players in the solution
-        int size = 0;
+    size_t get_size() { // returns the number of players in the solution
+        size_t size = 0;
         for (auto pos : positions) {
             size += players[pos].size();
         }
@@ -151,6 +150,7 @@ public:
     void remove_player(const Player& p) {
         cost -= p.price;
         points -= p.points;
+
         auto it = find(players[p.pos].begin(), players[p.pos].end(), p);
         players[p.pos].erase(it);
     }
@@ -161,6 +161,15 @@ public:
 
     PlayerList at(string pos) const {
         return players.at(pos);
+    }
+
+    bool operator==(const Solution& other) const { // !!! l'ordre no hauria d'importar
+        for (auto pos : positions) {
+            set<Player> set1 (at(pos).begin(), at(pos).end());
+            set<Player> set2 (other.at(pos).begin(), other.at(pos).end());
+            if (set1 != set2) return false;
+        }
+        return true;
     }
 
     
@@ -207,7 +216,8 @@ using Population = vector<Solution>;
 
 Query read_query(const string& input_query) {
     ifstream file(input_query);
-    int N1, N2, N3, max_cost, max_price_per_player;
+    uint N1, N2, N3;
+    int max_cost, max_price_per_player;
     file >> N1 >> N2 >> N3 >> max_cost >> max_price_per_player;
     return {N1, N2, N3, max_cost, max_price_per_player};
 }
@@ -321,8 +331,9 @@ Population recombine_and_mutate(const Solution& parent1, const Solution& parent2
                 }
             }
         }
-        // assert(new_solution.get_size() == 11);
         mutate(new_solution);
+        // if (find(combined_solutions.begin(), combined_solutions.end(), new_solution) != combined_solutions.end())
+        //     continue;
         combined_solutions.push_back(new_solution);
     }
 
@@ -393,7 +404,7 @@ void metaheuristica(int num_selected) {
             best_solution = candidate;
             
             best_solution.write();
-            cout << "New best solution found: " << best_solution.get_points() << ", " << best_solution.get_cost() <<  endl;
+            cout << "New best solution found: " << best_solution.get_points() <<  endl;
             no_improvement_count = 0;
         }
     }

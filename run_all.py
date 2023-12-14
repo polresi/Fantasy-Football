@@ -16,8 +16,11 @@ def get_average(alg, diff):
 
 def main():
     alg = sys.argv[1]
+    
+    if len(sys.argv) <= 2 or sys.argv[2] != 'nc': # nc = no compilation
+        compile_file(alg)
+
     print(f'Algorithm: {alg}')
-    compile_file(alg)
 
     avg = {}
     difficulties = ('easy', 'med', 'hard') if alg != 'exh' else ('easy', 'med')

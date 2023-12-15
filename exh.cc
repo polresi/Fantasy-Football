@@ -158,7 +158,6 @@ private:
     }
     
     bool can_be_added(const Player& player) const {
-        if (players.at(player.pos).size() + 1 > query.max_num_players[player.pos]) return false;
         if (cost + player.price > query.max_cost) return false;
 
         for (Player p : players.at(player.pos)) {
@@ -293,6 +292,8 @@ void exhaustive_search(Solution& solution, string prev_pos = "", uint last_index
             exhaustive_search(solution, pos, i+1);
             solution.pop_last_player_at(player.pos);
         }
+        // can be optimised: for example, if we can't add a player due to the number of players already in the solution
+        // we can skip all players following this
     }
 }
 

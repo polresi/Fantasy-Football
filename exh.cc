@@ -89,15 +89,17 @@ public:
         return size;
     }
 
-    // Adds a player to the solution if it is possible to do so.
-    // @returns true if the player was added, false otherwise. 
-    bool add_if_possible(const Player& player) {
-        // the only way a player can't be added is if its price exceeds the maximum cost
-        if (cost + player.price > query.max_cost) {
-            return false;
-        }
-        add_player(player);
-        return true;
+    // The only way a player can't be added is if its price exceeds the maximum cost
+    bool can_be_added(const Player& player) const {
+        return cost + player.price <= query.max_cost;
+    }
+
+    // Adds a player to the solution
+    void add_player(const Player& player) {
+        players[player.pos].push_back(player);
+        
+        cost += player.price;
+        points += player.points;
     }
 
     // Removes the last player added to the solution
@@ -150,13 +152,6 @@ public:
     }
 
 private:
-
-    void add_player(const Player& player) {
-        players[player.pos].push_back(player);
-        
-        cost += player.price;
-        points += player.points;
-    }
 
     // Writes the players of a given position in the output files
     // @param pos: the position of the players to be written
@@ -280,12 +275,16 @@ void exhaustive_search(Solution& solution, string prev_pos = "", uint last_index
     for (uint i = last_index; i < players_map[pos].size(); i++) {
         Player player = players_map[pos][i];
         
-        if (solution.add_if_possible(player)) {
+        if (solution.can_be_added(player)) {
+            solution.add_player(player);
+
             exhaustive_search(solution, pos, i+1);
             solution.pop_last_player_at(player.pos);
         }
-        // can be optimised: for example, if we can't add a player due to the number of players already in the solution
-        // we can skip all players following this
+        // !!! could maybe be improved by adding a break here, for example if the players are sorted by price ASC
+        // and one player isn't added, then the next players won't be added either
+        // but this could hurt performance because the first solution would be really bad
+        // Maybe we could get the greedy solution, and start comparing to it, but are we allowed???
     }
 }
 

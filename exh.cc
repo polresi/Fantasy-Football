@@ -92,11 +92,12 @@ public:
     // Adds a player to the solution if it is possible to do so.
     // @returns true if the player was added, false otherwise. 
     bool add_if_possible(const Player& player) {
-        if (can_be_added(player)) {
-            add_player(player);
-            return true;
+        // the only way a player can't be added is if its price exceeds the maximum cost
+        if (cost + player.price > query.max_cost) {
+            return false;
         }
-        return false;
+        add_player(player);
+        return true;
     }
 
     // Removes the last player added to the solution
@@ -155,15 +156,6 @@ private:
         
         cost += player.price;
         points += player.points;
-    }
-    
-    bool can_be_added(const Player& player) const {
-        if (cost + player.price > query.max_cost) return false;
-
-        for (Player p : players.at(player.pos)) {
-            if (p == player) return false;
-        }
-        return true;
     }
 
     // Writes the players of a given position in the output files

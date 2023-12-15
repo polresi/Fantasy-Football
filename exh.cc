@@ -13,8 +13,6 @@ using namespace std;
 
 // Global variables
 const vector<string> positions = {"por", "def", "mig", "dav"}; // List of all the positions: ["por", "def", "mig", "dav"] 
-const map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}}; // Map to convert the position to capital letters
-int max_points = 0; // max points of all players
 map<string, int> max_points_pos = {{"por", 0}, {"def", 0}, {"mig", 0}, {"dav", 0}}; // max points of all players in each position
 
 string output_file;
@@ -139,8 +137,9 @@ public:
         output.precision(1);
         output << duration/1000.0 << endl;
 
+        const map<string, string> pos_to_UPPER = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}};
         for (auto pos : positions) {
-            output << pos_to_CAPS.at(pos) << ": ";
+            output << pos_to_UPPER.at(pos) << ": ";
             write_players(pos, output);
         }
 

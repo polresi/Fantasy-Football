@@ -14,6 +14,8 @@ using namespace std;
 // Global variables
 const vector<string> positions = {"por", "def", "mig", "dav"}; // List of all the positions: ["por", "def", "mig", "dav"] 
 const map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}}; // Map to convert the position to capital letters
+int max_points = 0; // max points of all players
+map<string, int> max_points_pos = {{"por", 0}, {"def", 0}, {"mig", 0}, {"dav", 0}}; // max points of all players in each position
 
 string output_file;
 chrono::time_point<chrono::high_resolution_clock> start_time;
@@ -81,7 +83,7 @@ public:
     
     int get_points() const { return points; }
 
-    size_t get_size() const {
+    size_t size() const {
         size_t size = 0;
         for (auto pos : positions) {
             size += players.at(pos).size();
@@ -115,6 +117,16 @@ public:
             if (players.at(pos).size() < query.max_num_players[pos]) return pos;
         }
         assert(false); // the solution is not complete before calling this function
+    }
+
+    // Returns the maximum possible points of the solution, using the current points of the solution 
+    // and the maximum points of players in each position
+    int get_max_possible_points() const {
+        int max_possible_points = points;
+        for (auto pos : positions) {
+            max_possible_points += max_points_pos.at(pos) * (query.max_num_players.at(pos) - players.at(pos).size());
+        }
+        return max_possible_points;
     }
 
     // Writes the solution in the output file
@@ -212,7 +224,10 @@ void read_players_map()
         
         Player player = {name, position, price, points};    
         players_map[player.pos].push_back(player);
+
+        max_points_pos[position] = max(max_points_pos[position], points);
     }
+
     in.close();
 
     // remove players that are worse in points and price than other players in the same position given the maximum number of players in each position  
@@ -254,7 +269,7 @@ void read_players_map()
  */
 void exhaustive_search(Solution& solution, string prev_pos = "", uint last_index = 0) {
     
-    if (solution.get_size() == 11) {
+    if (solution.size() == 11) {
         
         if (solution.get_points() > best_solution.get_points()) {
             best_solution = solution;
@@ -264,6 +279,8 @@ void exhaustive_search(Solution& solution, string prev_pos = "", uint last_index
     }
 
     if (solution.get_cost() > query.max_cost) return;
+
+    if (solution.get_max_possible_points() < best_solution.get_points()) return;
 
     // search for the next position needed to complete the solution
     string pos = solution.get_pos_to_add();

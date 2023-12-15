@@ -23,7 +23,7 @@ def main():
     print(f'Algorithm: {alg}')
 
     avg = {}
-    difficulties = ('easy', 'med', 'hard') if alg != 'exh' else ('easy', 'med')
+    difficulties = ('easy', 'med', 'hard')
     
     for diff in difficulties:
         avg[diff] = get_average(alg, diff)

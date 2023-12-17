@@ -1,8 +1,8 @@
 import subprocess
 import sys
 
-def get_points(alg, diff, num):
-    arguments = ['data_base.txt', 'new_benchs/'+diff+'-'+num+'.txt', 'output.txt']
+def get_points(alg, diff, num, output_file='output.txt'):
+    arguments = ['data_base.txt', 'new_benchs/'+diff+'-'+num+'.txt', output_file]
 
     try:
         subprocess.run(['./'+alg] + arguments, check=True)
@@ -16,7 +16,7 @@ def get_points(alg, diff, num):
         print(f"Output is not valid")
 
 
-    with open('output.txt', 'r') as file:
+    with open(output_file, 'r') as file:
         content = file.read()
         points_line = content.split('\n')[-3]
         points = int(points_line.split()[-1])

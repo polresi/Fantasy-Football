@@ -7,30 +7,34 @@ def get_average(alg, diff):
 
     sum = 0
     for i in range(1, 8):
-        points = get_points(alg, diff, str(i))
+        points = get_points(alg, diff, str(i), f'output-{alg}-all.txt')
         print(f'{diff}-{i}: {points}')
         sum += points
 
-    return int(sum / 7)
+    return sum / 7
 
 
 def main():
     alg = sys.argv[1]
     
-    if len(sys.argv) <= 2 or sys.argv[2] != 'nc': # nc = no compilation
+    if sys.argv[-1] != 'nc': # nc = no compilation
         compile_file(alg)
+
+    difficulties = ('easy', 'med', 'hard')
+    
+    if len(sys.argv) > 2:
+        difficulties = [sys.argv[2]]
 
     print(f'Algorithm: {alg}')
 
     avg = {}
-    difficulties = ('easy', 'med', 'hard')
     
     for diff in difficulties:
         avg[diff] = get_average(alg, diff)
 
     print()
     for diff, avg in avg.items():
-        print(f'{diff: >4} avg : {avg}')
+        print(f'{diff: >4} avg : {avg:.1f}')
     print()
 
 if __name__ == '__main__':

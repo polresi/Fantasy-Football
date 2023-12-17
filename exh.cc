@@ -23,10 +23,8 @@ class Player
 {
 public:
     static inline double alpha;
-    string name;
-    string pos;
-    int price;
-    int points;
+    string name, pos;
+    int price, points;
 
     Player(const string& name, const string& pos, int price, int points)
         : name(name), pos(pos), price(price), points(points) {}

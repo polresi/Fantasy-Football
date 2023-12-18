@@ -176,12 +176,17 @@ private:
 
     void update_valid() {
         
-        if (cost > query.max_cost) { valid = false; return; }
-
-        // check that there are no repeated players
+        if (cost > query.max_cost) {
+            valid = false;
+            return;
+        }
         for (auto pos : positions) {
-            set<Player> set1 (players.at(pos).begin(), players.at(pos).end());
-            if (set1.size() != players.at(pos).size()) { valid = false; return; }
+            for (uint i = 0; i < at(pos).size(); i++) {
+                if (find(at(pos).begin() + i + 1, at(pos).end(), at(pos)[i]) != at(pos).end()) {
+                    valid = false;
+                    return;
+                }
+            }
         }
         valid = true;
     }

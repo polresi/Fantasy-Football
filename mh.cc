@@ -78,8 +78,7 @@ class Solution {
 
 private:
     map<string, PlayerList> players;
-    int cost;
-    int points;
+    int cost, points;
     bool valid;
 
 public:
@@ -114,8 +113,6 @@ public:
         
         cost += player.price;
         points += player.points;
-
-        update_valid();
     }
     
     bool can_be_added(const Player& player) const {
@@ -172,24 +169,24 @@ public:
         output.close();
     }
 
-private:
-
     void update_valid() {
         
         if (cost > query.max_cost) {
             valid = false;
             return;
         }
+
         for (auto pos : positions) {
-            for (uint i = 0; i < at(pos).size(); i++) {
-                if (find(at(pos).begin() + i + 1, at(pos).end(), at(pos)[i]) != at(pos).end()) {
-                    valid = false;
-                    return;
-                }
+            set<Player> set1 (players.at(pos).begin(), players.at(pos).end());
+            if (set1.size() != players.at(pos).size()) {
+                valid = false;
+                return;
             }
         }
         valid = true;
     }
+
+private:
 
     // Writes the players of a given position in the output files
     void write_players(string pos, ofstream& output) {
@@ -320,6 +317,7 @@ void mutate(Solution& solution) {
             }
         }
     }
+    solution.update_valid();
     return;
 }
 

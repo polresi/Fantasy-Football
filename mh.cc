@@ -22,10 +22,10 @@ string output_filename;
 chrono::time_point <chrono::high_resolution_clock> start;
 
 // Parameters of the metaheuristic algorithm
-const long unsigned int num_selected = 200; // number of solutions selected in each iteration
+const long unsigned int num_selected = 400; // number of solutions selected in each iteration
 const uint num_combined = 100; //  number of solutions combined and mutated in each iteration
 const double mutation_rate = 0.1; // probability of mutation of each player in a mutated solution
-const uint max_no_improvement = 2000; // maximum number of iterations without improvement allowed
+const uint max_no_improvement = 500; // maximum number of iterations without improvement allowed
 
 
 class Player
@@ -78,30 +78,33 @@ class Solution {
 
 private:
     map<string, PlayerList> players;
-    int cost, points;
+    int cost;
+    int points;
+    bool valid;
 
 public:
 
     // Default constructor
-    Solution() : cost(0), points(0){
+    Solution() : cost(0), points(0), valid(0){
         for (auto pos : positions) {
             players[pos] = PlayerList();
         }
     }
 
     // Constructor
-    Solution(map<string, PlayerList> players, int cost, int points, string last_pos_added) 
-        : players(players), cost(cost), points(points) {}
-
+    Solution(map<string, PlayerList> players, int cost, int points) 
+        : players(players), cost(cost), points(points) {
+            update_valid();
+        }
 
     int get_cost() const { return cost; }
     
     int get_points() const { return points; }
 
-    size_t get_size() { // returns the number of players in the solution
+    size_t get_size() const { // returns the number of players in the solution
         size_t size = 0;
         for (auto pos : positions) {
-            size += players[pos].size();
+            size += at(pos).size();
         }
         return size;
     }
@@ -111,29 +114,16 @@ public:
         
         cost += player.price;
         points += player.points;
+
+        update_valid();
     }
     
-    bool can_be_added(const Player& player) {
-        if (players[player.pos].size() + 1 > query.max_num_players[player.pos]) return false;
+    bool can_be_added(const Player& player) const {
+        if (at(player.pos).size() + 1 > query.max_num_players[player.pos]) return false;
         if (cost + player.price > query.max_cost) return false;
 
-        for (Player p : players[player.pos]) {
+        for (Player p : at(player.pos)) {
             if (p == player) return false;
-        }
-        return true;
-    }
-
-    bool is_valid() const {
-        
-        if (cost > query.max_cost) return false;
-
-        // check that there are no repeated players
-        for (auto pos : positions) {        
-            for (uint i = 0; i < players.at(pos).size() - 1; i++) {
-                for (uint j = i+1; j < players.at(pos).size(); j++) {
-                    if (players.at(pos)[i] == players.at(pos)[j]) return false;
-                }
-            }
         }
         return true;
     }
@@ -146,8 +136,8 @@ public:
         players[p.pos].erase(it);
     }
 
-    PlayerList operator[](string pos) {
-        return players[pos];
+    bool is_valid() const {
+        return valid;
     }
 
     const PlayerList& at(string pos) const {
@@ -162,7 +152,6 @@ public:
         }
         return true;
     }
-
     
     // Writes the solution in the output file
     void write() {
@@ -184,6 +173,18 @@ public:
     }
 
 private:
+
+    void update_valid() {
+        
+        if (cost > query.max_cost) { valid = false; return; }
+
+        // check that there are no repeated players
+        for (auto pos : positions) {
+            set<Player> set1 (players.at(pos).begin(), players.at(pos).end());
+            if (set1.size() != players.at(pos).size()) { valid = false; return; }
+        }
+        valid = true;
+    }
 
     // Writes the players of a given position in the output files
     void write_players(string pos, ofstream& output) {
@@ -302,41 +303,20 @@ pair<Solution, Solution> select_parents(const Population& population) {
 
 void mutate(Solution& solution) {
     for (auto pos : positions) {
-        for (Player p : solution[pos]) {
+        for (Player p : solution.at(pos)) {
             if ((rand() / double(RAND_MAX)) < mutation_rate) {
                 solution.remove_player(p);
+                
+                // double r = rand() / (double)RAND_MAX;
+                // uint index = r*r*players_map[pos].size();
+                // solution.add_player(players_map[pos][index]);
+
                 solution.add_player(players_map[pos][rand() % players_map[pos].size()]);
             }
         }
     }
     return;
 }
-
-// void mutate2(Solution& solution){
-    
-//     for (auto pos : positions){
-//         for (Player p : solution[pos]) {
-
-//             if ((rand() / double(RAND_MAX)) < mutation_rate){
-//                 solution.remove_player(p);
-                
-//                 size_t n = solution[pos].size();
-//                 uint random = rand() % (n*(n-1) / 2); // 0 .. n*(n-1)/2 - 1
-
-//                 for (uint i = 1; i <= n; ++i){
-//                     if (random < i) {
-//                         solution.add_player(players_map[pos][i-1]);
-//                         break;
-//                     } else {
-//                         random -= i;
-//                     }
-//                 }
-//             }
-
-//         }
-//     }
-//     return;
-// }
 
 
 Population recombine_and_mutate(const Solution& parent1, const Solution& parent2) {
@@ -346,9 +326,9 @@ Population recombine_and_mutate(const Solution& parent1, const Solution& parent2
 
         Solution new_solution = parent1;
         for (auto pos : positions){
-            for (unsigned int j = 0; j < new_solution[pos].size(); ++j) {
+            for (unsigned int j = 0; j < new_solution.at(pos).size(); ++j) {
                 if (rand() % 2 == 0) {
-                    new_solution.remove_player(new_solution[pos][j]); // solution[pos] == solution.player[pos]
+                    new_solution.remove_player(new_solution.at(pos)[j]);
                     new_solution.add_player(parent2.at(pos)[j]);
                 }
             }
@@ -367,7 +347,6 @@ Population recombine_and_mutate(const Solution& parent1, const Solution& parent2
 }
 
 Population select_individuals(Population solutions) {
-    Population selected_solutions;
 
     sort (solutions.begin(), solutions.end(), [](const Solution& s1, const Solution& s2) {
         return fitness(s1) > fitness(s2);
@@ -376,10 +355,9 @@ Population select_individuals(Population solutions) {
     return Population(solutions.begin(), solutions.begin() + min(num_selected, solutions.size()));
 }
 
-Population generate_initial_population() { // Use greedy algorithm to generate an initial solution
-    Solution solution;
-    Population initial_population;
 
+Solution get_greedy_solution() {
+    Solution solution;
     vector<PlayerList::iterator> iters = {players_map["por"].begin(), players_map["def"].begin(), 
                                           players_map["mig"].begin(),players_map["dav"].begin()};
 
@@ -399,8 +377,12 @@ Population generate_initial_population() { // Use greedy algorithm to generate a
         else
             best_values[index] = (*iters[index]).get_value();
     }
-    
-    initial_population.push_back(solution);
+    return solution;
+}
+
+Population generate_initial_population() { // Use greedy algorithm to generate an initial solution
+
+    Population initial_population = {get_greedy_solution()};
 
     for (uint i = 0; i < num_selected - 1; ++i) {
         Solution new_solution;
@@ -415,11 +397,14 @@ Population generate_initial_population() { // Use greedy algorithm to generate a
     
 }
 
+
 void metaheuristica(int num_selected) {
 
     Population population = generate_initial_population();
     uint no_improvement_count = 0;
+    uint gen = 0;
     while (no_improvement_count++ < max_no_improvement) {
+        if(++gen % 500 == 0) cout << "gen: " << gen << endl;
 
         auto [parent1, parent2] = select_parents(population);
         Population mutated = recombine_and_mutate(parent1, parent2);
@@ -428,6 +413,7 @@ void metaheuristica(int num_selected) {
         
         Solution candidate = population[0];
         if (candidate.get_points() > best_solution.get_points() and candidate.is_valid()) {
+            cout << "New best solution " << candidate.get_points() << ", gen:" << gen << endl;
             best_solution = candidate;            
             best_solution.write();
             no_improvement_count = 0;

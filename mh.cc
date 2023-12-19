@@ -1,21 +1,20 @@
-#include <iostream>
+#include <algorithm>
+#include <cassert>
+#include <chrono>
 #include <fstream>
+#include <iostream>
+#include <map>
+#include <random>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <map>
-#include <set>
-#include <sstream>
-#include <algorithm>
-#include <chrono>
-#include <random>
-#include <cassert>
 
 using namespace std;
 
 
 // Global variables
 const vector<string> positions = {"por", "def", "mig", "dav"}; // all the possible positions
-map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}};
+map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}}; // map to convert the positions to uppercase
 map<string, int> max_points_pos = {{"por", 0}, {"def", 0}, {"mig", 0}, {"dav", 0}}; // max points of all players in each position
 
 string output_filename;
@@ -24,8 +23,9 @@ chrono::time_point <chrono::high_resolution_clock> start;
 // Parameters of the metaheuristic algorithm
 const long unsigned int population_size = 2000; // number of solutions selected in each iteration
 const uint num_combined = 500; //  number of solutions combined and mutated in each iteration
-const double mutation_rate = 0.1; // probability of mutation of each player in a mutated solution
-const uint max_no_improvement = 1000; // maximum number of iterations without improvement allowed
+const double mutation_rate = 0.15; // probability of mutation of each player in a mutated solution
+const uint max_no_improvement = 2000; // maximum number of iterations without improvement allowed
+
 
 // Random number generator
 random_device rd;
@@ -183,16 +183,6 @@ public:
         output.close();
     }
 
-    bool operator==(const Solution& other) const { // !!! l'ordre no hauria d'importar
-        for (auto pos : positions) {
-            set<Player> set1 (at(pos).begin(), at(pos).end());
-            set<Player> set2 (other.at(pos).begin(), other.at(pos).end());
-            if (set1 != set2) return false;
-        }
-        return true;
-    }
-
-
 private:
 
     // Updates the valid attribute of the solution
@@ -202,10 +192,12 @@ private:
             return;
         }
         for (auto pos : positions) {
-            set<Player> set1 (players.at(pos).begin(), players.at(pos).end());
-            if (set1.size() != players.at(pos).size()) {
-                valid = false;
-                return;
+            // check that there are no repeated players in the same position
+            for (uint i = 0; i < at(pos).size(); i++) {
+                if (find(at(pos).begin() + i + 1, at(pos).end(), at(pos)[i]) != at(pos).end()) {
+                    valid = false;
+                    return;
+                }
             }
         }
         valid = true;
@@ -291,11 +283,6 @@ void read_players_map()
 
         }
     }
-    
-    // sort each of the lists of players by a heuristic determining the best players to be considered first
-    for (auto pos : positions) {
-        sort(players_map[pos].begin(), players_map[pos].end(), greater<Player>());
-    }
 
     // add fake players to each position given the maximum number of players in each position
     for (auto pos : positions) {
@@ -363,36 +350,12 @@ void select_individuals(Population& population) {
 }
 
 
-Solution get_greedy_solution() {
-    Solution solution;
-    vector<PlayerList::iterator> iters = {players_map["por"].begin(), players_map["def"].begin(), 
-                                          players_map["mig"].begin(),players_map["dav"].begin()};
-
-    vector<double> best_values = {players_map["por"][0].get_value(), players_map["def"][0].get_value(),
-                                  players_map["mig"][0].get_value(), players_map["dav"][0].get_value()};
-
-    while (solution.get_size() < 11) {
-        int index = max_element(best_values.begin(), best_values.end()) - best_values.begin();
-        
-        if (solution.can_be_added(*(iters[index])))
-            solution.add_player(*(iters[index]));
-
-        iters[index]++;
-        
-        if (iters[index] == players_map[positions[index]].end())
-            best_values[index] = -1;
-        else
-            best_values[index] = (*iters[index]).get_value();
-    }
-    return solution;
-}
-
 Population generate_initial_population() { // Use greedy algorithm to generate an initial solution
 
-    Population initial_population = {get_greedy_solution()};
-    // Population initial_population;
+    // Population initial_population = {get_greedy_solution()};
+    Population initial_population;
 
-    for (uint i = 0; i < population_size - 1; ++i) {
+    for (uint i = 0; i < population_size; ++i) {
         Solution new_solution;
         for (auto pos : positions) {
             for (uint j = 0; j < query.max_num_players[pos]; j++) {
@@ -410,17 +373,16 @@ void metaheuristica(int population_size) {
 
     Population population = generate_initial_population();
     uint no_improvement_count = 0;
-    uint gen = 0;
+    uint generation = 0;
     while (no_improvement_count++ < max_no_improvement) {
-        if(++gen % 500 == 0) cout << "gen: " << gen << endl;
-
+        if (++generation % 500 == 0) cout << "gen " << generation << endl;
         auto [parent1, parent2] = select_parents(population);
         recombine_and_mutate(parent1, parent2, population);
         select_individuals(population);
         
         Solution candidate = population[0];
         if (candidate.get_points() > best_solution.get_points() and candidate.is_valid()) {
-            cout << "New best solution " << candidate.get_points() << ", gen:" << gen << endl;
+            cout << "New best solution " << candidate.get_points() << ", gen:" << generation << endl;
             best_solution = candidate;            
             best_solution.write();
             no_improvement_count = 0;

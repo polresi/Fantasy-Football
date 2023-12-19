@@ -78,13 +78,15 @@ class Solution {
 
 private:
     map<string, PlayerList> players;
-    int cost, points;
+    int cost;
+    int points;
     bool valid;
+    bool valid_needs_update = true;
 
 public:
 
     // Default constructor
-    Solution() : cost(0), points(0), valid(0){
+    Solution() : cost(0), points(0) {
         for (auto pos : positions) {
             players[pos] = PlayerList();
         }
@@ -92,9 +94,7 @@ public:
 
     // Constructor
     Solution(map<string, PlayerList> players, int cost, int points) 
-        : players(players), cost(cost), points(points) {
-            update_valid();
-        }
+        : players(players), cost(cost), points(points) {}
 
     int get_cost() const { return cost; }
     
@@ -113,6 +113,8 @@ public:
         
         cost += player.price;
         points += player.points;
+
+        valid_needs_update = true;
     }
     
     bool can_be_added(const Player& player) const {
@@ -131,9 +133,15 @@ public:
 
         auto it = find(players[p.pos].begin(), players[p.pos].end(), p);
         players[p.pos].erase(it);
+
+        valid_needs_update = true;
     }
 
-    bool is_valid() const {
+    bool is_valid() {
+        if (valid_needs_update) {
+            update_valid();
+            valid_needs_update = false;
+        }
         return valid;
     }
 
@@ -141,14 +149,14 @@ public:
         return players.at(pos);
     }
 
-    bool operator==(const Solution& other) const { // !!! l'ordre no hauria d'importar
-        for (auto pos : positions) {
-            set<Player> set1 (at(pos).begin(), at(pos).end());
-            set<Player> set2 (other.at(pos).begin(), other.at(pos).end());
-            if (set1 != set2) return false;
-        }
-        return true;
-    }
+    // bool operator==(const Solution& other) const {
+    //     for (auto pos : positions) {
+    //         set<Player> set1 (at(pos).begin(), at(pos).end());
+    //         set<Player> set2 (other.at(pos).begin(), other.at(pos).end());
+    //         if (set1 != set2) return false;
+    //     }
+    //     return true;
+    // }
     
     // Writes the solution in the output file
     void write() {
@@ -169,6 +177,8 @@ public:
         output.close();
     }
 
+private:
+
     void update_valid() {
         
         if (cost > query.max_cost) {
@@ -185,8 +195,6 @@ public:
         }
         valid = true;
     }
-
-private:
 
     // Writes the players of a given position in the output files
     void write_players(string pos, ofstream& output) {
@@ -285,7 +293,7 @@ void read_players_map()
 }
 
 
-int fitness(const Solution& solution){ // returns the fitness of a solution
+int fitness(Solution& solution){ // returns the fitness of a solution
     if (not solution.is_valid()) return 0; // penalize the solutions that exceed the maximum cost
     return solution.get_points();
 }
@@ -317,16 +325,13 @@ void mutate(Solution& solution) {
             }
         }
     }
-    solution.update_valid();
     return;
 }
 
 
-Population recombine_and_mutate(const Solution& parent1, const Solution& parent2) {
-    Population combined_solutions;
-    
+void recombine_and_mutate(const Solution& parent1, const Solution& parent2, Population& population) {  
     for (uint i = 0; i < num_combined; ++i) {
-
+    
         Solution new_solution = parent1;
         for (auto pos : positions){
             for (unsigned int j = 0; j < new_solution.at(pos).size(); ++j) {
@@ -338,24 +343,24 @@ Population recombine_and_mutate(const Solution& parent1, const Solution& parent2
         }
         mutate(new_solution);
 
-        if (find(combined_solutions.begin(), combined_solutions.end(), new_solution) != combined_solutions.end()) {
-            i--;
-           continue;
-        }
+        // auto start = next(population.begin(), num_selected);
+        // if (find(population.begin(), population.end(), new_solution) != population.end()) {
+        //     i--;
+        //    continue;
+        // }
 
-        combined_solutions.push_back(new_solution);
+        population.push_back(new_solution);
     }
-
-    return combined_solutions;
 }
 
-Population select_individuals(Population solutions) {
 
-    sort (solutions.begin(), solutions.end(), [](const Solution& s1, const Solution& s2) {
+void select_individuals(Population& population) {
+
+    sort(population.begin(), population.end(), [](Solution& s1, Solution& s2) {
         return fitness(s1) > fitness(s2);
     });
 
-    return Population(solutions.begin(), solutions.begin() + min(num_selected, solutions.size()));
+    population = Population(population.begin(), population.begin() + min(num_selected, population.size()));
 }
 
 
@@ -410,9 +415,9 @@ void metaheuristica(int num_selected) {
         if(++gen % 500 == 0) cout << "gen: " << gen << endl;
 
         auto [parent1, parent2] = select_parents(population);
-        Population mutated = recombine_and_mutate(parent1, parent2);
-        population.insert(population.end(), mutated.begin(), mutated.end());
-        population = select_individuals(population);
+        recombine_and_mutate(parent1, parent2, population);
+        // population.insert(population.end(), mutated.begin(), mutated.end());
+        select_individuals(population);
         
         Solution candidate = population[0];
         if (candidate.get_points() > best_solution.get_points() and candidate.is_valid()) {

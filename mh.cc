@@ -22,10 +22,26 @@ string output_filename;
 chrono::time_point <chrono::high_resolution_clock> start;
 
 // Parameters of the metaheuristic algorithm
-const long unsigned int num_selected = 400; // number of solutions selected in each iteration
-const uint num_combined = 100; //  number of solutions combined and mutated in each iteration
+const long unsigned int population_size = 2000; // number of solutions selected in each iteration
+const uint num_combined = 500; //  number of solutions combined and mutated in each iteration
 const double mutation_rate = 0.1; // probability of mutation of each player in a mutated solution
-const uint max_no_improvement = 500; // maximum number of iterations without improvement allowed
+const uint max_no_improvement = 1000; // maximum number of iterations without improvement allowed
+
+// Random number generator
+random_device rd;
+mt19937 gen(rd());
+
+// Returns a random integer between 0 and n-1
+uint rand_uint(uint n) {
+    uniform_int_distribution<uint> distribution(0, n-1);
+    return distribution(gen);
+}
+
+// Returns a random floar bewteen 0 and 1
+double rand_0to1() {
+    uniform_real_distribution<double> distribution(0, 1);
+    return distribution(gen);
+}
 
 
 class Player
@@ -78,8 +94,7 @@ class Solution {
 
 private:
     map<string, PlayerList> players;
-    int cost;
-    int points;
+    int cost, points;
     bool valid;
     bool valid_needs_update = true;
 
@@ -148,15 +163,6 @@ public:
     const PlayerList& at(string pos) const {
         return players.at(pos);
     }
-
-    // bool operator==(const Solution& other) const {
-    //     for (auto pos : positions) {
-    //         set<Player> set1 (at(pos).begin(), at(pos).end());
-    //         set<Player> set2 (other.at(pos).begin(), other.at(pos).end());
-    //         if (set1 != set2) return false;
-    //     }
-    //     return true;
-    // }
     
     // Writes the solution in the output file
     void write() {
@@ -177,15 +183,24 @@ public:
         output.close();
     }
 
+    bool operator==(const Solution& other) const { // !!! l'ordre no hauria d'importar
+        for (auto pos : positions) {
+            set<Player> set1 (at(pos).begin(), at(pos).end());
+            set<Player> set2 (other.at(pos).begin(), other.at(pos).end());
+            if (set1 != set2) return false;
+        }
+        return true;
+    }
+
+
 private:
 
+    // Updates the valid attribute of the solution
     void update_valid() {
-        
         if (cost > query.max_cost) {
             valid = false;
             return;
         }
-
         for (auto pos : positions) {
             set<Player> set1 (players.at(pos).begin(), players.at(pos).end());
             if (set1.size() != players.at(pos).size()) {
@@ -300,28 +315,19 @@ int fitness(Solution& solution){ // returns the fitness of a solution
 
 
 pair<Solution, Solution> select_parents(const Population& population) {
-    
-    int index1 = rand() % population.size();
-    int index2 = rand() % population.size();
 
-    Solution solution1 = population[index1];
-    Solution solution2 = population[index2];
-
-    return {solution1, solution2};
+    vector<Solution> parents (2);
+    sample(population.begin(), population.end(), parents.begin(), 2, gen);
+    return {parents[0], parents[1]};
 }
 
 
 void mutate(Solution& solution) {
     for (auto pos : positions) {
         for (Player p : solution.at(pos)) {
-            if ((rand() / double(RAND_MAX)) < mutation_rate) {
+            if (rand_0to1() < mutation_rate) {
                 solution.remove_player(p);
-                
-                // double r = rand() / (double)RAND_MAX;
-                // uint index = r*r*players_map[pos].size();
-                // solution.add_player(players_map[pos][index]);
-
-                solution.add_player(players_map[pos][rand() % players_map[pos].size()]);
+                solution.add_player(players_map[pos][rand_uint(players_map[pos].size())]);
             }
         }
     }
@@ -335,20 +341,13 @@ void recombine_and_mutate(const Solution& parent1, const Solution& parent2, Popu
         Solution new_solution = parent1;
         for (auto pos : positions){
             for (unsigned int j = 0; j < new_solution.at(pos).size(); ++j) {
-                if (rand() % 2 == 0) {
+                if (rand_uint(2) == 0) {
                     new_solution.remove_player(new_solution.at(pos)[j]);
                     new_solution.add_player(parent2.at(pos)[j]);
                 }
             }
         }
         mutate(new_solution);
-
-        // auto start = next(population.begin(), num_selected);
-        // if (find(population.begin(), population.end(), new_solution) != population.end()) {
-        //     i--;
-        //    continue;
-        // }
-
         population.push_back(new_solution);
     }
 }
@@ -360,7 +359,7 @@ void select_individuals(Population& population) {
         return fitness(s1) > fitness(s2);
     });
 
-    population = Population(population.begin(), population.begin() + min(num_selected, population.size()));
+    population = Population(population.begin(), population.begin() + min(population_size, population.size()));
 }
 
 
@@ -391,12 +390,13 @@ Solution get_greedy_solution() {
 Population generate_initial_population() { // Use greedy algorithm to generate an initial solution
 
     Population initial_population = {get_greedy_solution()};
+    // Population initial_population;
 
-    for (uint i = 0; i < num_selected - 1; ++i) {
+    for (uint i = 0; i < population_size - 1; ++i) {
         Solution new_solution;
         for (auto pos : positions) {
             for (uint j = 0; j < query.max_num_players[pos]; j++) {
-                new_solution.add_player(players_map[pos][rand() % players_map[pos].size()]);
+                new_solution.add_player(players_map[pos][rand_uint(players_map[pos].size())]);
             }
         }
         initial_population.push_back(new_solution);
@@ -406,7 +406,7 @@ Population generate_initial_population() { // Use greedy algorithm to generate a
 }
 
 
-void metaheuristica(int num_selected) {
+void metaheuristica(int population_size) {
 
     Population population = generate_initial_population();
     uint no_improvement_count = 0;
@@ -416,7 +416,6 @@ void metaheuristica(int num_selected) {
 
         auto [parent1, parent2] = select_parents(population);
         recombine_and_mutate(parent1, parent2, population);
-        // population.insert(population.end(), mutated.begin(), mutated.end());
         select_individuals(population);
         
         Solution candidate = population[0];
@@ -433,11 +432,10 @@ void metaheuristica(int num_selected) {
 int main(int argc, char *argv[]) {
     if (argc != 4) { // If the number of the files is not correct
         cout << "Us incorrecte. S'han de proporcionar 3 arguments: data_base, query_file, output_file" << endl;
-        return 1; 
+        return 1;
     }
 
     start = chrono::high_resolution_clock::now(); // start the timer
-    srand(time(0));
 
     string input_database = argv[1];
     string input_query = argv[2];
@@ -448,5 +446,5 @@ int main(int argc, char *argv[]) {
 
     read_players_map();
     
-    metaheuristica(num_selected);
+    metaheuristica(population_size);
 }

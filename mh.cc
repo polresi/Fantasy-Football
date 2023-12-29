@@ -163,6 +163,10 @@ public:
     const PlayerList& at(string pos) const {
         return players.at(pos);
     }
+
+    bool operator> (Solution& other) {
+        return fitness() > other.fitness();
+    }
     
     // Writes the solution in the output file
     void write() {
@@ -201,6 +205,12 @@ private:
             }
         }
         valid = true;
+    }
+
+    // Returns the fitness of a solution
+    int fitness() {
+        if (not is_valid()) return 0;
+        return points;
     }
 
     // Writes the players of a given position in the output files
@@ -295,12 +305,6 @@ void read_players_map()
 }
 
 
-int fitness(Solution& solution){ // returns the fitness of a solution
-    if (not solution.is_valid()) return 0; // penalize the solutions that exceed the maximum cost
-    return solution.get_points();
-}
-
-
 pair<Solution, Solution> select_parents(const Population& population) {
 
     vector<Solution> parents (2);
@@ -343,16 +347,15 @@ void recombine_and_mutate(const Solution& parent1, const Solution& parent2, Popu
 void select_individuals(Population& population) {
 
     sort(population.begin(), population.end(), [](Solution& s1, Solution& s2) {
-        return fitness(s1) > fitness(s2);
+        return s1 > s2;
     });
 
     population = Population(population.begin(), population.begin() + min(population_size, population.size()));
 }
 
 
-Population generate_initial_population() { // Use greedy algorithm to generate an initial solution
+Population generate_initial_population() {
 
-    // Population initial_population = {get_greedy_solution()};
     Population initial_population;
 
     for (uint i = 0; i < population_size; ++i) {

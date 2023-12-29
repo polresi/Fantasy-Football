@@ -14,11 +14,10 @@ using namespace std;
 
 // Global variables
 const vector<string> positions = {"por", "def", "mig", "dav"}; // all the possible positions
-map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}}; // map to convert the positions to uppercase
 map<string, int> max_points_pos = {{"por", 0}, {"def", 0}, {"mig", 0}, {"dav", 0}}; // max points of all players in each position
 
-string output_filename;
-chrono::time_point <chrono::high_resolution_clock> start;
+string output_file;
+chrono::time_point <chrono::high_resolution_clock> start_time;
 
 // Parameters of the metaheuristic algorithm
 const uint population_size = 2000; // number of solutions selected in each iteration
@@ -50,8 +49,6 @@ public:
     static inline double alpha;
     string name, pos;
     int price, points;
-
-    Player () {}
 
     Player(const string& name, const string& pos, int price, int points)
         : name(name), pos(pos), price(price), points(points) {}
@@ -101,7 +98,6 @@ private:
 
 public:
 
-    // Default constructor
     Solution() : cost(0), points(0), valid_needs_update(true) {
         for (auto pos : positions) {
             players[pos] = PlayerList();
@@ -147,19 +143,21 @@ public:
     }
     
     // Writes the solution in the output file
-    void write() {
-        ofstream output(output_filename);
-        auto end = chrono::high_resolution_clock::now();
-        auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    void write() const { 
+        ofstream output(output_file);
+
+        auto end_time = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
         output << fixed;
         output.precision(1);
         output << duration/1000.0 << endl;
 
+        const map<string, string> pos_to_UPPER = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}};
         for (auto pos : positions) {
-            output << pos_to_CAPS[pos] << ": ";
+            output << pos_to_UPPER.at(pos) << ": ";
             write_players(pos, output);
         }
-        
+
         output << "Punts: " << points << endl;
         output << "Preu: " << cost << endl;
         output.close();
@@ -192,9 +190,9 @@ private:
     }
 
     // Writes the players of a given position in the output files
-    void write_players(string pos, ofstream& output) {
+    void write_players(string pos, ofstream& output) const {
         bool first = true;
-        for (Player p : players[pos]) {
+        for (Player p : at(pos)) {
             if (first) {
                 first = false;
                 output << p.name;
@@ -379,11 +377,11 @@ void metaheuristica(int population_size) {
 
 int main(int argc, char *argv[]) {
 
-    start = chrono::high_resolution_clock::now(); // start the timer
+    start_time = chrono::high_resolution_clock::now(); // start the timer
     
     string input_database = argv[1];
     string input_query = argv[2];
-    output_filename = argv[3];
+    output_file = argv[3];
 
     query = read_query(input_query);
     Player::alpha = pow(query.max_cost / 1e7, 0.3);

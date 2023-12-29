@@ -38,7 +38,6 @@ public:
     }
     
 private:
-    
     double get_value() const {
         if (price == 0) return 0;
         return pow(points, alpha + 1) / price;
@@ -53,8 +52,7 @@ struct Query
     map<string, uint> max_num_players = {{"por", 1}, {"def", N1}, {"mig", N2}, {"dav", N3}};
 };
 
-Query query; // global variable to store the query given
-
+Query query;
 
 using PlayerList = vector<Player>; // vector of players
 using PlayerMap = map<string, PlayerList>; // map of players by position

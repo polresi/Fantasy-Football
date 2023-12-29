@@ -190,6 +190,7 @@ private:
     }
 
     // Writes the players of a given position in the output files
+    // @param pos: the position of the players to be written
     void write_players(string pos, ofstream& output) const {
         bool first = true;
         for (Player p : players.at(pos)) {

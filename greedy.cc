@@ -165,8 +165,6 @@ private:
 
 };
 
-Solution best_solution; // global variable to store the best solution found so far
-
 
 Query read_query(const string& query_file) {
     ifstream file(query_file);

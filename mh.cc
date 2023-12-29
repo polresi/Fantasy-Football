@@ -21,7 +21,7 @@ string output_filename;
 chrono::time_point <chrono::high_resolution_clock> start;
 
 // Parameters of the metaheuristic algorithm
-const long unsigned int population_size = 2000; // number of solutions selected in each iteration
+const uint population_size = 2000; // number of solutions selected in each iteration
 const uint num_combined = 500; //  number of solutions combined and mutated in each iteration
 const double mutation_rate = 0.15; // probability of mutation of each player in a mutated solution
 const uint max_no_improvement = 2000; // maximum number of iterations without improvement allowed
@@ -37,7 +37,7 @@ uint rand_uint(uint n) {
     return distribution(gen);
 }
 
-// Returns a random floar bewteen 0 and 1
+// Returns a random float bewteen 0 and 1
 double rand_0to1() {
     uniform_real_distribution<double> distribution(0, 1);
     return distribution(gen);
@@ -68,10 +68,12 @@ public:
         return get_value() > other.get_value();
     }
 
+private:
     double get_value() const {
         if (price == 0) return 0;
         return pow(points, alpha + 1) / price;
     }
+
 };
 
 
@@ -94,34 +96,22 @@ class Solution {
 
 private:
     map<string, PlayerList> players;
-    int cost, points;
+    int cost = 0;
+    int points = 0;
     bool valid;
     bool valid_needs_update = true;
 
 public:
 
     // Default constructor
-    Solution() : cost(0), points(0) {
+    Solution() {
         for (auto pos : positions) {
             players[pos] = PlayerList();
         }
     }
 
-    // Constructor
-    Solution(map<string, PlayerList> players, int cost, int points) 
-        : players(players), cost(cost), points(points) {}
 
-    int get_cost() const { return cost; }
-    
     int get_points() const { return points; }
-
-    size_t get_size() const { // returns the number of players in the solution
-        size_t size = 0;
-        for (auto pos : positions) {
-            size += at(pos).size();
-        }
-        return size;
-    }
 
     void add_player(const Player& player) {
         players[player.pos].push_back(player);
@@ -130,16 +120,6 @@ public:
         points += player.points;
 
         valid_needs_update = true;
-    }
-    
-    bool can_be_added(const Player& player) const {
-        if (at(player.pos).size() + 1 > query.max_num_players[player.pos]) return false;
-        if (cost + player.price > query.max_cost) return false;
-
-        for (Player p : at(player.pos)) {
-            if (p == player) return false;
-        }
-        return true;
     }
 
     void remove_player(const Player& p) {
@@ -305,14 +285,15 @@ void read_players_map()
 }
 
 
+// Selects two parents from the population uniformly at random
 pair<Solution, Solution> select_parents(const Population& population) {
-
     vector<Solution> parents (2);
     sample(population.begin(), population.end(), parents.begin(), 2, gen);
     return {parents[0], parents[1]};
 }
 
 
+// Mutates a solution by removing and adding players randomly
 void mutate(Solution& solution) {
     for (auto pos : positions) {
         for (Player p : solution.at(pos)) {
@@ -326,6 +307,7 @@ void mutate(Solution& solution) {
 }
 
 
+// Recombines two solutions by removing and adding players from each position, and mutates the resulting solutions
 void recombine_and_mutate(const Solution& parent1, const Solution& parent2, Population& population) {  
     for (uint i = 0; i < num_combined; ++i) {
     
@@ -338,22 +320,25 @@ void recombine_and_mutate(const Solution& parent1, const Solution& parent2, Popu
                 }
             }
         }
+
         mutate(new_solution);
         population.push_back(new_solution);
     }
 }
 
 
+// Selects the best individuals of the population
 void select_individuals(Population& population) {
 
     sort(population.begin(), population.end(), [](Solution& s1, Solution& s2) {
         return s1 > s2;
     });
 
-    population = Population(population.begin(), population.begin() + min(population_size, population.size()));
+    population = Population(population.begin(), population.begin() + min(population_size, (uint)population.size()));
 }
 
 
+// Generates an initial population of random solutions
 Population generate_initial_population() {
 
     Population initial_population;
@@ -376,32 +361,28 @@ void metaheuristica(int population_size) {
 
     Population population = generate_initial_population();
     uint no_improvement_count = 0;
-    uint generation = 0;
+
     while (no_improvement_count++ < max_no_improvement) {
-        if (++generation % 500 == 0) cout << "gen " << generation << endl;
+    
         auto [parent1, parent2] = select_parents(population);
         recombine_and_mutate(parent1, parent2, population);
         select_individuals(population);
-        
+
         Solution candidate = population[0];
         if (candidate.get_points() > best_solution.get_points() and candidate.is_valid()) {
-            cout << "New best solution " << candidate.get_points() << ", gen:" << generation << endl;
             best_solution = candidate;            
             best_solution.write();
             no_improvement_count = 0;
         }
     }
+
 }
 
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) { // If the number of the files is not correct
-        cout << "Us incorrecte. S'han de proporcionar 3 arguments: data_base, query_file, output_file" << endl;
-        return 1;
-    }
 
     start = chrono::high_resolution_clock::now(); // start the timer
-
+    
     string input_database = argv[1];
     string input_query = argv[2];
     output_filename = argv[3];

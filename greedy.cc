@@ -73,20 +73,22 @@ public:
         }
     }
 
-    /*
-     * Obtains the best player that can be added to the solution, and adds it to the solution.
-     * It uses a heuristic that depends on the max_cost of the query
-     * @returns false if no player can be added, true otherwise.
-     */
-    bool add_best_player() {
 
-    // filter out the players that can't (and will never be able to) be added
+    // Returns true if some player can be added to the solution
+    bool can_some_be_added() const {
+
+        // filter out the players that can't (and will never be able to) be added
         player_list.erase(remove_if(player_list.begin(), player_list.end(), [this](Player p){
             return not can_be_added(p);
         }), player_list.end());
 
         if (player_list.empty()) return false;
+        
+        return true;
+    }
 
+    // Adds the best player to the solution, according to a heuristic
+    void add_best_player() {
         Player best_player;
         
         if (size() == 10) { // last player to be added
@@ -97,8 +99,8 @@ public:
         else {
             best_player = *max_element(player_list.begin(), player_list.end()); // get the best player according to Player comparison operator
         }
+
         add_player(best_player);
-        return true;
     }
     
     // Writes the solution in the output file
@@ -140,6 +142,7 @@ private:
 
     bool can_be_added(const Player& player) const {
         if (players.at(player.pos).size() + 1 > query.max_num_players[player.pos]) return false;
+        
         if (cost + player.price > query.max_cost) return false;
 
         for (Player p : players.at(player.pos)) {
@@ -214,7 +217,9 @@ void read_players_list()
  */
 void greedy() {
     Solution solution;
-    while(solution.add_best_player()) {}
+    while(solution.can_some_be_added()) {
+        solution.add_best_player();
+    }
 
     solution.write();
 }

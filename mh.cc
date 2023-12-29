@@ -173,8 +173,8 @@ private:
         }
         for (auto pos : positions) {
             // check that there are no repeated players in the same position
-            for (uint i = 0; i < at(pos).size(); i++) {
-                if (find(at(pos).begin() + i + 1, at(pos).end(), at(pos)[i]) != at(pos).end()) {
+            for (uint i = 0; i < players.at(pos).size(); i++) {
+                if (find(players.at(pos).begin() + i + 1, players.at(pos).end(), players.at(pos)[i]) != players.at(pos).end()) {
                     valid = false;
                     return;
                 }
@@ -192,7 +192,7 @@ private:
     // Writes the players of a given position in the output files
     void write_players(string pos, ofstream& output) const {
         bool first = true;
-        for (Player p : at(pos)) {
+        for (Player p : players.at(pos)) {
             if (first) {
                 first = false;
                 output << p.name;

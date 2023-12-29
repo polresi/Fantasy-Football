@@ -12,7 +12,6 @@ using namespace std;
 
 // Global variables
 const vector<string> positions = {"por", "def", "mig", "dav"}; // all the possible positions
-const map<string, string> pos_to_CAPS = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}};
 
 string output_file;
 chrono::time_point <chrono::high_resolution_clock> start_time;
@@ -22,10 +21,8 @@ class Player
 {
 public:
     static inline double alpha;
-    string name;
-    string pos;
-    int price;
-    int points;
+    string name, pos;
+    int price, points;
 
     Player () {}
 
@@ -41,7 +38,6 @@ public:
     }
 
 private:
-    
     double get_value() const {
         if (price == 0) return 0;
         return pow(points, alpha + 1) / price;
@@ -93,7 +89,7 @@ public:
 
         Player best_player;
         
-        if (get_size() == 10) { // last player to be added
+        if (size() == 10) { // last player to be added
             best_player = *max_element(player_list.begin(), player_list.end(), [](const Player& p1, const Player& p2) {
                 return p1.points < p2.points; // get the player with most points
             });
@@ -106,7 +102,7 @@ public:
     }
     
     // Writes the solution in the output file
-    void write() { 
+    void write() const { 
         ofstream output(output_file);
 
         auto end_time = chrono::high_resolution_clock::now();
@@ -115,19 +111,19 @@ public:
         output.precision(1);
         output << duration/1000.0 << endl;
 
+        const map<string, string> pos_to_UPPER = {{"por","POR"}, {"def","DEF"}, {"mig","MIG"}, {"dav","DAV"}};
         for (auto pos : positions) {
-            output << pos_to_CAPS.at(pos) << ": ";
+            output << pos_to_UPPER.at(pos) << ": ";
             write_players(pos, output);
         }
-        
+
         output << "Punts: " << points << endl;
         output << "Preu: " << cost << endl;
         output.close();
     }
 
 private:
-
-    size_t get_size() const {
+    size_t size() const {
         size_t size = 0;
         for (auto pos : positions) {
             size += players.at(pos).size();
@@ -154,9 +150,9 @@ private:
 
     // Writes the players of a given position in the output files
     // @param pos: the position of the players to be written
-    void write_players(string pos, ofstream& output) {
+    void write_players(string pos, ofstream& output) const {
         bool first = true;
-        for (Player p : players[pos]) {
+        for (Player p : players.at(pos)) {
             if (first) first = false;
             else output << ";";
             output << p.name;

@@ -96,15 +96,13 @@ class Solution {
 
 private:
     map<string, PlayerList> players;
-    int cost = 0;
-    int points = 0;
-    bool valid;
-    bool valid_needs_update = true;
+    int cost, points;
+    bool valid, valid_needs_update;
 
 public:
 
     // Default constructor
-    Solution() {
+    Solution() : cost(0), points(0), valid_needs_update(true) {
         for (auto pos : positions) {
             players[pos] = PlayerList();
         }
